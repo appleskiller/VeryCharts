@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: "../src" ,
     paths: {
-        "d3": "../lib/d3" 
+        "d3": "../test/lib/d3" 
     }
 });
 
