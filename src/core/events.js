@@ -24,11 +24,7 @@ define(function (require , exports , module) {
 				this.isDefaultPrevented = returnTrue;
 		} ,
     });
-    
-    function triggerEvents(events , event) {
-        // body...
-    }
-    
+
     var eventApi = {
         on: function (type , callback , priority) {
             if (!type || !callback) return this;

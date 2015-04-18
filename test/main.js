@@ -3,6 +3,7 @@ requirejs.config({
     paths: {
         "d3": "../test/lib/d3" ,
         "oop": "core/oop" ,
+        "evts": "core/events" ,
         
         "verycharts/Chart": "core/Chart" ,
         "verycharts/Component": "core/Component" ,

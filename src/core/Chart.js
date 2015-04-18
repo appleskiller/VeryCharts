@@ -1,9 +1,9 @@
 define(function (require , exports , module) {
     "use strict";
-    var oop = require("oop");
+    var evts = require("evts");
     require("d3");
     
-    var Chart = oop.Class.extend({
+    var Chart = evts.EventTrigger.extend({
         constructor: function Chart(selector) {
         } ,
         _dom: null ,
