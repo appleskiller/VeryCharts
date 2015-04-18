@@ -51,7 +51,10 @@ define(function (require , exports , module) {
     
         return child;
     }
-    
+    /**
+     * aasdfasdfasdfasdf
+     * 
+     **/
     function Class() {
         // body...
     }

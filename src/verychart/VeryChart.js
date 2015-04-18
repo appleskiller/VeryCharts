@@ -1,9 +1,9 @@
 define(function (require , exports , module) {
     "use strict";
-    var oop = require("oop");
+    var evts = require("evts");
     var Chart = require("verycharts/Chart");
     
-    var VeryChart = oop.Class.extend({
+    var VeryChart = evts.EventTrigger.extend({
         constructor: function VeryChart(selector) {
             this._chart = new Chart(selector);
         } ,

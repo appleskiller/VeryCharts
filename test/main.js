@@ -3,11 +3,12 @@ requirejs.config({
     paths: {
         "d3": "../test/lib/d3" ,
         "oop": "core/oop" ,
-        "evts": "core/events" ,
+        "evts": "core/evts" ,
         
         "verycharts/Chart": "core/Chart" ,
         "verycharts/Component": "core/Component" ,
         "verycharts/Element": "core/Element" ,
+        "verycharts/helper": "core/helper" ,
     }
 });
 

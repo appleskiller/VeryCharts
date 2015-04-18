@@ -76,7 +76,7 @@ define(function (require , exports , module) {
         } ,
         trigger: function (event) {
 			if (!event) return this;
-			if (typeof event === "string"){ event = {type: event} }
+			if (typeof event === "string"){ event = Event(event) };
 			event.target = this;
 			
 			if (!this._events) return this;

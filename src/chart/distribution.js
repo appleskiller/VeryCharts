@@ -16,7 +16,7 @@ define(function (require , exports , module) {
             .append("rect")
             .attr("class" , "tick")
             .attr("x" , function (v , ind) {
-                return ind * 10;
+                return ind * 20;
             })
             .attr("width" , 9)
             .attr("height" , 4);
