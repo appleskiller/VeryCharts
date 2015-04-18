@@ -1,4 +1,5 @@
 define(function (require , exports , module) {
+    "use strict";
     var ObjProto = Object.prototype;
     var hasOwnProperty = ObjProto.hasOwnProperty;
     var toString = ObjProto.toString;
@@ -28,6 +29,7 @@ define(function (require , exports , module) {
                 }
             }
         }
+        return obj;
     }
     
     function classExtend(props) {
@@ -50,12 +52,19 @@ define(function (require , exports , module) {
         return child;
     }
     
+    function Class() {
+        // body...
+    }
+    Class.prototype = {};
+    Class.extend = classExtend;
+    
     module.exports = {
         extend: extend ,
         extendable: function (ctor) {
             ctor.extend = classExtend;
         } ,
         has: has ,
-        is: is
+        is: is ,
+        Class: Class
     };
 })
