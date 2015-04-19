@@ -3,13 +3,13 @@ define(function (require , exports , module) {
     var evts = require("evts");
     var helper = require("verycharts/helper");
     
+    var chartType = "chart";
+    
     var Chart = evts.EventTrigger.extend({
-        constructor: function Chart(selector) {
-            this.initialize(selector);
-        } ,
+        constructor: function Chart() {} ,
         _dom: null ,
         _data: null ,
-        _option: null ,
+        _options: null ,
         _theme: null ,
         initialize: function (selector) {
             if (!this._dom){
@@ -19,7 +19,7 @@ define(function (require , exports , module) {
             return this;
         } ,
         getChartType: function () {
-            return "chart"
+            return chartType;
         } ,
         setData: function (data) {
             this._data = data;
@@ -27,14 +27,14 @@ define(function (require , exports , module) {
             this.invalidateRender();
             return this;
         } ,
-        setOption: function (option) {
-            this._option = option;
+        setOptions: function (options) {
+            this._options = options;
             this._optionChanged = true;
             this.invalidateRender();
             return this;
         } ,
-        getOption: function () {
-            return this._option;
+        getOptions: function () {
+            return this._options;
         } ,
         setTheme: function (theme) {
             this._theme = theme;
