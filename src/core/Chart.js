@@ -18,6 +18,9 @@ define(function (require , exports , module) {
             this.invalidateRender();
             return this;
         } ,
+        getChartType: function () {
+            return "chart"
+        } ,
         setData: function (data) {
             this._data = data;
             this._dataChanged = true;
