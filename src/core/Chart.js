@@ -2,11 +2,15 @@ define(function (require , exports , module) {
     "use strict";
     var evts = require("evts");
     var helper = require("verycharts/helper");
+    var ChartDefault = require("verycharts/ChartDefault");
     
     var chartType = "chart";
     
     var Chart = evts.EventTrigger.extend({
-        constructor: function Chart() {} ,
+        constructor: function Chart() {
+            this._defaultOptions = ChartDefault.cloneDefault();
+        } ,
+        _defaultOptions: null ,
         _dom: null ,
         _data: null ,
         _options: null ,

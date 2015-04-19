@@ -14,14 +14,14 @@ define(function (require , exports , module) {
         getChartInstance: function (chartType) {
             if (chartLib[chartType]){
                 var instance = new chartLib[chartType]();
-                instance.setTheme(ChartDefault.cloneDefault());
+                return instance;
             }
             return null;
         } ,
-        getComponentInstance: function (componentName) {
+        getComponentInstance: function (componentName , chart) {
             if (componentLib[componentName]){
-                var instance = new componentLib[componentName]();
-                instance.setOptions(ChartDefault.cloneDefault(componentName));
+                var instance = new componentLib[componentName](chart);
+                return instance;
             }
             return null;
         } ,
