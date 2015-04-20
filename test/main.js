@@ -10,6 +10,7 @@ requirejs.config({
         "verycharts/Chart": "core/Chart" ,
         "verycharts/ChartDefault": "core/ChartDefault" ,
         "verycharts/ChartFactory": "core/ChartFactory" ,
+        "verycharts/ChartPlot": "core/ChartPlot" ,
         "verycharts/Component": "core/Component" ,
         "verycharts/Element": "core/Element" ,
         "verycharts/helper": "core/helper" ,

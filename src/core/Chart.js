@@ -4,12 +4,11 @@ define(function (require , exports , module) {
     var helper = require("verycharts/helper");
     var ChartDefault = require("verycharts/ChartDefault");
     
-    var chartType = "chart";
-    
     var Chart = evts.EventTrigger.extend({
         constructor: function Chart() {
             this._defaultOptions = ChartDefault.cloneDefault();
         } ,
+        _space: null ,
         _defaultOptions: null ,
         _dom: null ,
         _data: null ,
@@ -21,9 +20,6 @@ define(function (require , exports , module) {
             }
             this.invalidateRender();
             return this;
-        } ,
-        getChartType: function () {
-            return chartType;
         } ,
         setData: function (data) {
             this._data = data;
@@ -67,6 +63,10 @@ define(function (require , exports , module) {
             this._styles = null;
             this._data = null;
             this._theme = null;
+            if (this._space){
+                this._space.destroy();
+                this._space = null;
+            }
             this._destroyed = true;
             return this;
         } ,
@@ -88,7 +88,7 @@ define(function (require , exports , module) {
             }
         } ,
         _mergeTheme: function () {
-            
+            helper.merge(this._defaultOptions , this._theme);
         } ,
         _mergeOption: function () {
             
