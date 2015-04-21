@@ -5,11 +5,19 @@ define(function (require , exports , module) {
     
     var Component = oop.Class.extend({
         constructor: function Component(chart) {
-            this._chart = chart;
+            this.chart = chart;
         } ,
-        _chart: null ,
+        chart: null ,
         setOptions: function (options) {
-            this._options = options;
+            return this;
+        } , 
+        setData: function (data) {
+            return this;
+        } ,
+        layout: function () {
+            return this;
+        } ,
+        render: function () {
             return this;
         }
     });

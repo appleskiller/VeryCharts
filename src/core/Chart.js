@@ -8,11 +8,13 @@ define(function (require , exports , module) {
         constructor: function Chart() {
             this._defaultOptions = ChartDefault.cloneDefault();
         } ,
-        _space: null ,
+        _components: null ,
+        _chartPlots: null ,
         _defaultOptions: null ,
+        _mergedOptions: null ,
+        _options: null ,
         _dom: null ,
         _data: null ,
-        _options: null ,
         _theme: null ,
         initialize: function (selector) {
             if (!this._dom){
@@ -91,13 +93,17 @@ define(function (require , exports , module) {
             helper.merge(this._defaultOptions , this._theme);
         } ,
         _mergeOption: function () {
-            
+            this._mergedOptions = helper.merge(helper.clone(this._defaultOptions) , this._options)
         } ,
         _performData: function () {
-            
+            // 准备并验证数据
+            // 一维数组
+            // 二维数组
+            // 结构化对象
         } ,
         _performLayout: function () {
-            // body...
+            // 更新基础组件布局
+            // 更新布局
         } ,
         _render: function () {
             // body...

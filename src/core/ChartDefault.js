@@ -5,22 +5,6 @@ define(function (require , exports , module) {
     
     function chart() {
         return {
-            "title": {
-                "enabled": true ,
-                "text": "Chart Title" ,
-                "style": {
-                    "font": {
-                        "family": "Verdana , Arial, sans-serif" ,
-                        "size": 12 ,
-                        "color": "#000000" ,
-                    } 
-                } ,
-                "position": {
-                    "horizontal": "center" ,
-                    "vertical": "top" ,
-                    "float": false
-                }
-            } ,
             "style": {}
         }
     }

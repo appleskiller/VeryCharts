@@ -5,9 +5,11 @@ requirejs.config({
         
         "oop": "core/oop" ,
         "evts": "core/evts" ,
+        "display": "core/display" ,
         
         "verycharts": "verycharts" ,
         "verycharts/Chart": "core/Chart" ,
+        "verycharts/consts": "core/consts" ,
         "verycharts/ChartDefault": "core/ChartDefault" ,
         "verycharts/ChartFactory": "core/ChartFactory" ,
         "verycharts/ChartPlot": "core/ChartPlot" ,

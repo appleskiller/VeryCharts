@@ -21,7 +21,7 @@ define(function (require , exports , module) {
             }
             instances[id] = new Chart();
             return instances[id];
-        }
+        } ,
     }
     
     module.exports = verycharts;

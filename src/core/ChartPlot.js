@@ -3,7 +3,6 @@ define(function (require , exports , module) {
     var oop = require("oop");
     
     var chartType = "chart";
-    var spaceType = "cartesian";
     
     var ChartPlot = oop.Class.extend({
         constructor: function ChartPlot(chart , defaultOptions) {
@@ -15,9 +14,6 @@ define(function (require , exports , module) {
         _defaultOptions: null ,
         getChartType: function () {
             return chartType;
-        } ,
-        getSpaceType: function () {
-            return spaceType;
         } ,
         setViewPort: function (viewport) {
             this._viewPort = viewport;
