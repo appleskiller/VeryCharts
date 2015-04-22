@@ -1,0 +1,4 @@
+{
+    groupType: "column | row | value | color | size" ,
+    plotType: "bar | ..."
+}

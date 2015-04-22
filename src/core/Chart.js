@@ -1,21 +1,27 @@
 define(function (require , exports , module) {
     "use strict";
+    var oop = require("oop");
     var evts = require("evts");
     var helper = require("verycharts/helper");
     var ChartDefault = require("verycharts/ChartDefault");
+    var ChartFactory = require("verycharts/ChartFactory");
     
     var Chart = evts.EventTrigger.extend({
         constructor: function Chart() {
             this._defaultOptions = ChartDefault.cloneDefault();
+            this._components = {};
+            this._chartPlots = {};
         } ,
         _components: null ,
         _chartPlots: null ,
         _defaultOptions: null ,
-        _mergedOptions: null ,
         _options: null ,
         _dom: null ,
         _data: null ,
         _theme: null ,
+        
+        _originOptions: null ,
+        _originData: null ,
         initialize: function (selector) {
             if (!this._dom){
                 this._dom = document.createElement("div");
@@ -65,6 +71,7 @@ define(function (require , exports , module) {
             this._styles = null;
             this._data = null;
             this._theme = null;
+            this._originData = null;
             if (this._space){
                 this._space.destroy();
                 this._space = null;
@@ -93,20 +100,88 @@ define(function (require , exports , module) {
             helper.merge(this._defaultOptions , this._theme);
         } ,
         _mergeOption: function () {
-            this._mergedOptions = helper.merge(helper.clone(this._defaultOptions) , this._options)
+            this._originOptions = helper.merge(helper.clone(this._defaultOptions) , this._options);
+            var type;
+            for (type in this._chartPlots) {
+                this._chartPlots[type].setOptions(this._originOptions);
+            }
+            for (var type in this._components) {
+                this._components[type].setOptions(this._originOptions)
+            }
         } ,
         _performData: function () {
-            // 准备并验证数据
-            // 一维数组
-            // 二维数组
-            // 结构化对象
+            var header , data , plotTypes , plot , type , i;
+            // 准备数据
+            if (!this._data){
+                this._originData = null;
+            }else{
+                if (oop.is(this._data , Array)){
+                    header = this._data[0];
+                    data = this._data.slice(1);
+                    if (!data.length){
+                        this._originData = null;
+                    }else{
+                        // 一维数组,转为二维结构。
+                        if (!oop.is(header , Array)){
+                            header = [header];
+                            data = [data];
+                        }
+                        this._originData = {
+                            header: header ,
+                            data: data
+                        }
+                    }
+                } else if (typeof this._data === "object") {
+                    header = this._data.header;
+                    data = this._data.data;
+                    if (!header || !data || !oop.is(header , Array) || oop.is(data , Array)){
+                        this._originData = null;
+                    }else{
+                        this._originData = data;
+                    }
+                } else {
+                    this._originData = null;
+                }
+            }
+            // 解析header,创建或更新plot数据
+            if (this._originData){
+                plotTypes = {};
+                header = this._originData.header;
+                data = this._originData.data;
+                for (i = 0; i < header.length; i++) {
+                    if (header[i].plotType){
+                        plotTypes[header[i].plotType] = true;
+                    }
+                }
+                for (type in this._chartPlots) {
+                    if (plotTypes[type] === true){
+                        this._chartPlots[type].setData(this._originData);
+                        delete plotTypes[type];
+                    }else{
+                        this._chartPlots[type].destroy();
+                        delete this._chartPlots[type];
+                    }
+                }
+                // 创建plot
+                for (type in plotTypes) {
+                    plot = ChartFactory.getChartPlotInstance(type);
+                    if (plot){
+                        this._chartPlots[type] = plot;
+                        plot.setOptions(this._originOptions).setData(this._originData);
+                    }
+                }
+            }
         } ,
         _performLayout: function () {
-            // 更新基础组件布局
-            // 更新布局
+            if (!this._originData){
+                
+            }else{
+                // 更新基础组件布局
+                // 更新布局
+            }
         } ,
         _render: function () {
-            // body...
+            // 渲染基础组件及chart
         } ,
         _nextFrame: function () {
             if (!this._nextFrameFlag){

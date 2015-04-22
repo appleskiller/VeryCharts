@@ -5,18 +5,30 @@ define(function (require , exports , module) {
     var chartType = "chart";
     
     var ChartPlot = oop.Class.extend({
-        constructor: function ChartPlot(chart , defaultOptions) {
-            this._chart = chart;
-            this._defaultOptions = defaultOptions;
+        constructor: function ChartPlot(chart) {
+            this.chart = chart;
         } ,
-        _viewPort: null ,
-        _chart: null ,
-        _defaultOptions: null ,
+        viewPort: null ,
+        chart: null ,
+        options: null ,
+        data: null ,
         getChartType: function () {
             return chartType;
         } ,
+        setOptions: function (options) {
+            // body...
+            return this;
+        } ,
+        setData: function () {
+            // body...
+            return this;
+        } ,
         setViewPort: function (viewport) {
-            this._viewPort = viewport;
+            this.viewPort = viewport;
+            return this;
+        } ,
+        destroy: function () {
+            
         }
     })
     
