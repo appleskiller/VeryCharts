@@ -7,14 +7,15 @@ define(function (require , exports , module) {
     var ChartFactory = require("verycharts/ChartFactory");
     
     var Chart = evts.EventTrigger.extend({
-        constructor: function Chart() {
+        constructor: function Chart(dom) {
+            this._dom = dom;
             this._defaultOptions = ChartDefault.cloneDefault();
-            this._components = {};
             this._chartPlots = {};
         } ,
         _components: null ,
         _chartPlots: null ,
         _defaultOptions: null ,
+        _mergedOptions: null ,
         _options: null ,
         _dom: null ,
         _data: null ,
@@ -22,21 +23,15 @@ define(function (require , exports , module) {
         
         _originOptions: null ,
         _originData: null ,
-        initialize: function (selector) {
-            if (!this._dom){
-                this._dom = document.createElement("div");
-            }
-            this.invalidateRender();
-            return this;
-        } ,
         setData: function (data) {
             this._data = data;
             this._dataChanged = true;
             this.invalidateRender();
             return this;
         } ,
-        setOptions: function (options) {
+        setOptions: function (options , merge) {
             this._options = options;
+            this._mergeOptionFlag = (merge === true);
             this._optionChanged = true;
             this.invalidateRender();
             return this;
@@ -100,7 +95,13 @@ define(function (require , exports , module) {
             helper.merge(this._defaultOptions , this._theme);
         } ,
         _mergeOption: function () {
-            this._originOptions = helper.merge(helper.clone(this._defaultOptions) , this._options);
+            if (this._mergeOptionFlag && this._mergedOptions){
+                this._mergedOptions = helper.merge(this._mergedOptions , this._options);
+            }else{
+                this._mergedOptions = this._options;
+            }
+            this._originOptions = helper.merge(helper.clone(this._defaultOptions) , this._mergedOptions);
+            
             var type;
             for (type in this._chartPlots) {
                 this._chartPlots[type].setOptions(this._originOptions);
@@ -118,18 +119,14 @@ define(function (require , exports , module) {
                 if (oop.is(this._data , Array)){
                     header = this._data[0];
                     data = this._data.slice(1);
-                    if (!data.length){
-                        this._originData = null;
-                    }else{
-                        // 一维数组,转为二维结构。
-                        if (!oop.is(header , Array)){
-                            header = [header];
-                            data = [data];
-                        }
-                        this._originData = {
-                            header: header ,
-                            data: data
-                        }
+                    // 一维数组,转为二维结构。
+                    if (!oop.is(header , Array)){
+                        header = [header];
+                        data = [data];
+                    }
+                    this._originData = {
+                        header: header ,
+                        data: data
                     }
                 } else if (typeof this._data === "object") {
                     header = this._data.header;
@@ -143,9 +140,9 @@ define(function (require , exports , module) {
                     this._originData = null;
                 }
             }
-            // 解析header,创建或更新plot数据
+            // 解析header
+            plotTypes = {};
             if (this._originData){
-                plotTypes = {};
                 header = this._originData.header;
                 data = this._originData.data;
                 for (i = 0; i < header.length; i++) {
@@ -153,22 +150,23 @@ define(function (require , exports , module) {
                         plotTypes[header[i].plotType] = true;
                     }
                 }
-                for (type in this._chartPlots) {
-                    if (plotTypes[type] === true){
-                        this._chartPlots[type].setData(this._originData);
-                        delete plotTypes[type];
-                    }else{
-                        this._chartPlots[type].destroy();
-                        delete this._chartPlots[type];
-                    }
+            }
+            // 更新或删除plot
+            for (type in this._chartPlots) {
+                if (plotTypes[type] === true){
+                    this._chartPlots[type].setData(this._originData);
+                    delete plotTypes[type];
+                }else{
+                    this._chartPlots[type].destroy();
+                    delete this._chartPlots[type];
                 }
-                // 创建plot
-                for (type in plotTypes) {
-                    plot = ChartFactory.getChartPlotInstance(type);
-                    if (plot){
-                        this._chartPlots[type] = plot;
-                        plot.setOptions(this._originOptions).setData(this._originData);
-                    }
+            }
+            // 创建plot
+            for (type in plotTypes) {
+                plot = ChartFactory.getChartPlotInstance(type);
+                if (plot){
+                    this._chartPlots[type] = plot;
+                    plot.setOptions(this._originOptions).setData(this._originData);
                 }
             }
         } ,

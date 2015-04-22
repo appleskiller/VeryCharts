@@ -11,6 +11,8 @@ define(function (require , exports , module) {
     var verycharts = {
         version: "0.1.0" ,
         create: function (dom) {
+            if (!dom)
+                return null;
             var id = dom.getAttribute(ATTR_KEY);
             if (!id){
                 id = ATTR_KEY + count++;
@@ -19,7 +21,7 @@ define(function (require , exports , module) {
             if (instances[id]){
                 instances[id].dispose();
             }
-            instances[id] = new Chart();
+            instances[id] = new Chart(dom);
             return instances[id];
         } ,
     }
