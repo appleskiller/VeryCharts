@@ -8,9 +8,10 @@ define(function (require , exports , module) {
     
     var Chart = evts.EventTrigger.extend({
         constructor: function Chart(dom) {
-            this._dom = dom;
+            this._dom = this._initDOM(dom);
             this._defaultOptions = ChartDefault.cloneDefault();
             this._chartPlots = {};
+            this._components = {};
         } ,
         _components: null ,
         _chartPlots: null ,
@@ -67,10 +68,6 @@ define(function (require , exports , module) {
             this._data = null;
             this._theme = null;
             this._originData = null;
-            if (this._space){
-                this._space.destroy();
-                this._space = null;
-            }
             this._destroyed = true;
             return this;
         } ,
@@ -91,6 +88,13 @@ define(function (require , exports , module) {
                 this._dataChanged = false;
             }
         } ,
+        _initDOM: function (dom) {
+            dom.style["-webkit-tap-highlight-color"] = "transparent" ;
+            dom.style["-webkit-user-select"] = "none" ;
+            dom.style["background-color"] = "rgba(0, 0, 0, 0)" ;
+            dom.style["cursor"] = "default" ;
+            return dom;
+        } ,
         _mergeTheme: function () {
             helper.merge(this._defaultOptions , this._theme);
         } ,
@@ -106,8 +110,18 @@ define(function (require , exports , module) {
             for (type in this._chartPlots) {
                 this._chartPlots[type].setOptions(this._originOptions);
             }
-            for (var type in this._components) {
-                this._components[type].setOptions(this._originOptions)
+            // 循环option创建或更新component
+            var component , prop;
+            for (prop in this._originOptions) {
+                if (this._components[prop]){
+                    this._components[type].setOptions(this._originOptions);
+                }else{
+                    component = ChartFactory.getComponentInstance(prop , this);
+                    if (component){
+                        this._components[type] = component;
+                        component.setOptions(this._originOptions);
+                    }
+                }
             }
         } ,
         _performData: function () {
@@ -169,8 +183,13 @@ define(function (require , exports , module) {
                     plot.setOptions(this._originOptions).setData(this._originData);
                 }
             }
+            // 更新components
+            for (type in this._components) {
+                this._components[type].setData(this._originData);
+            }
         } ,
         _performLayout: function () {
+            var ww = this._dom.offsetWidth , hh = this._dom.offsetHeight;
             if (!this._originData){
                 
             }else{

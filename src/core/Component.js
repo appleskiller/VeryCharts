@@ -8,10 +8,14 @@ define(function (require , exports , module) {
             this.chart = chart;
         } ,
         chart: null ,
+        options: null ,
+        data: null , 
         setOptions: function (options) {
+            this.options = options;
             return this;
         } , 
         setData: function (data) {
+            this.data = data;
             return this;
         } ,
         layout: function () {

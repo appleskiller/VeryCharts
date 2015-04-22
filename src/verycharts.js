@@ -6,7 +6,7 @@ define(function (require , exports , module) {
     
     var instances = {};
     var count = 0;
-    var ATTR_KEY = "__verycharts__"
+    var ATTR_KEY = "__verycharts-id__"
     
     var verycharts = {
         version: "0.1.0" ,
@@ -15,7 +15,7 @@ define(function (require , exports , module) {
                 return null;
             var id = dom.getAttribute(ATTR_KEY);
             if (!id){
-                id = ATTR_KEY + count++;
+                id = "instance_" + count++;
                 dom.setAttribute(ATTR_KEY , id);
             }
             if (instances[id]){
