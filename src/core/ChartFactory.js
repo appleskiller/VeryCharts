@@ -5,22 +5,28 @@ define(function (require , exports , module) {
     var ChartDefault = require("verycharts/ChartDefault");
     var ChartPlot = require("verycharts/ChartPlot");
     var Component = require("verycharts/Component");
+    var Renderer = require("verycharts/ChartRenderer");
     
     var chartPlotLib = {};
     var componentLib = {};
+    var rendererLib = {};
     
     module.exports = {
         getChartPlotInstance: function (chartType) {
             if (chartPlotLib[chartType]){
-                var instance = new chartPlotLib[chartType]();
-                return instance;
+                return new chartPlotLib[chartType]();
             }
             return null;
         } ,
         getComponentInstance: function (componentName , chart) {
             if (componentLib[componentName]){
-                var instance = new componentLib[componentName](chart);
-                return instance;
+                return new componentLib[componentName](chart);
+            }
+            return null;
+        } ,
+        getRendererInstance: function (type , target) {
+            if (rendererLib[type]){
+                return new rendererLib[type](target);
             }
             return null;
         } ,
@@ -35,6 +41,8 @@ define(function (require , exports , module) {
             } else if (oop.is(ctor , Component)){
                 componentLib[type] = ctor;
                 ChartDefault.mergeDefault(defaultOptions);
+            } else if (oop.is(ctor , Renderer)){
+                rendererLib[type] = ctor;
             }
         } 
     }

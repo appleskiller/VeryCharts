@@ -9,8 +9,9 @@ define(function (require , exports , module) {
     function cssHeight (dom) {  
         if (dom.style.height) return dom.style.height;  
         if (dom.currentStyle) return dom.currentStyle.height;  
-        if (document.defaultView && document.defaultView.getComputedStyle)  
+        if (document.defaultView && document.defaultView.getComputedStyle) {
             return document.defaultView.getComputedStyle(dom , "").getPropertyValue("height");  
+        }
     }
     var resetCSS = function( dom , prop ) {  
         var old = {};  

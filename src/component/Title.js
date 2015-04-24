@@ -1,5 +1,6 @@
 define(function (require , exports , module) {
     "use strict";
+    var helper = require("verycharts/helper");
     var Component = require("verycharts/Component");
     var ChartFactory = require("verycharts/ChartFactory")
     
@@ -9,11 +10,16 @@ define(function (require , exports , module) {
         } ,
         options: null ,
         setOptions: function (options) {
-            this.option = options
+            this.option = options.title;
+            this.option.style = helper.parseOption("stats" , this.option.style);
             return this;
         } , 
-        layout: function () {
-            return this;
+        layout: function (bounds) {
+            if (this.options.enabled === false){
+                return bounds;
+            }else{
+                
+            }
         } ,
         render: function () {
             return this;
@@ -27,17 +33,21 @@ define(function (require , exports , module) {
             "title": {
                 "enabled": true ,
                 "text": "Chart Title" ,
+                // "useHTML": false ,
                 "style": {
-                    "font": {
-                        "family": "Verdana , Arial, sans-serif" ,
-                        "size": 12 ,
+                    "normal": {
                         "color": "#000000" ,
-                    } 
+                        "fontSize": 12 ,
+                        "fontWeight": "none" ,
+                        "fontFamily": "Verdana , Arial, sans-serif"
+                    }
                 } ,
-                "position": {
+                "layout": {
+                    "floating": false ,
+                    "anchor": "top" ,
                     "horizontal": "center" ,
                     "vertical": "top" ,
-                    "float": false
+                    "margin": 0 ,
                 }
             }
         }

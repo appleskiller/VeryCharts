@@ -10,12 +10,16 @@ requirejs.config({
         "verycharts": "verycharts" ,
         "verycharts/Chart": "core/Chart" ,
         "verycharts/consts": "core/consts" ,
+        "verycharts/helper": "core/helper" ,
+        
         "verycharts/ChartDefault": "core/ChartDefault" ,
+        "verycharts/ChartRenderer": "core/ChartRenderer" ,
         "verycharts/ChartFactory": "core/ChartFactory" ,
         "verycharts/ChartPlot": "core/ChartPlot" ,
         "verycharts/Component": "core/Component" ,
         "verycharts/Element": "core/Element" ,
-        "verycharts/helper": "core/helper" ,
+        
+        "verycharts/htmlUtil": "util/htmlUtil"
     }
 });
 

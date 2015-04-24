@@ -1,6 +1,7 @@
 define(function (require , exports , module) {
     "use strict";
     var oop = require("oop");
+    var helper = require("verycharts/helper");
     var ChartDefault = require("verycharts/ChartDefault");
     
     var Component = oop.Class.extend({
@@ -18,9 +19,12 @@ define(function (require , exports , module) {
             this.data = data;
             return this;
         } ,
-        layout: function () {
-            return this;
+        layout: function (bounds) {
+            return bounds;
         } ,
+        getBounds: function () {
+            this.bounds;
+        }
         render: function () {
             return this;
         }

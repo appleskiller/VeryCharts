@@ -82,10 +82,10 @@ define(function (require , exports , module) {
         }
     }
     
-    function getValue(obj) {
-        if (arguments.length <= 1)
+    function getValue(obj , prop) {
+        if (!prop)
             return obj;
-        var props = slice(arguments , 1) , value = obj;
+        var props = prop.split(".") , value = obj;
         for (var i = 0; i < props.length; i++){
             if (!value || !props[i] || !(props[i] in value))
                 return undefined;
@@ -316,12 +316,40 @@ define(function (require , exports , module) {
     DataCubeIndicator.create = function (headers , datas) {
         return new DataCubeIndicator(new DataCube(headers, datas));
     };
+    
+    function parseStats(opt) {
+        if (!opt)
+            return {normal: opt , hover: null};
+        var ret = {normal: {} , hover: null} , prop;
+        for (prop in opt) {
+            if (!hasOwnProperty(ret , prop)){
+                ret.normal[prop] = opt[prop];
+            }
+        }
+        if (opt.normal){
+            ret.normal = merge(ret.normal , opt.normal);
+        }
+        for (prop in ret) {
+            if (prop != "normal" && opt[prop]){
+                ret[prop] = merge(ret[prop] , opt[prop]);
+            }
+        }
+        return ret;
+    }
+    function parseOption(type , opt) {
+        if (type === "stats"){
+            return parseStats(opt);
+        }
+        return opt;
+    }
+    
     module.exports = {
         nextFrame: nextFrame ,
         callLater: callLater ,
         clone: clone ,
         merge: merge ,
         getValue: getValue ,
+        parseOption: parseOption ,
         
         DataCube: DataCube ,
         DataCubeIndicator: DataCubeIndicator

@@ -2,6 +2,7 @@ define(function (require , exports , module) {
     "use strict";
     var oop = require("oop");
     var evts = require("evts");
+    var htmlUtil = require("verycharts/htmlUtil");
     var helper = require("verycharts/helper");
     var ChartDefault = require("verycharts/ChartDefault");
     var ChartFactory = require("verycharts/ChartFactory");
@@ -189,12 +190,14 @@ define(function (require , exports , module) {
             }
         } ,
         _performLayout: function () {
-            var ww = this._dom.offsetWidth , hh = this._dom.offsetHeight;
-            if (!this._originData){
-                
-            }else{
-                // 更新基础组件布局
-                // 更新布局
+            var size = htmlUtil.size(this.chart._dom);
+            var bounds = {x: 0 , y: 0 , width: size.width , height: size.height};
+            var type;
+            for (type in this._components) {
+                bounds = this._components[type].layout(bounds);
+            }
+            for (type in this._chartPlots) {
+                bounds = this._chartPlots[type].layout(bounds);
             }
         } ,
         _render: function () {
@@ -215,9 +218,11 @@ define(function (require , exports , module) {
                 return;
             this._commitChanged();
             if (this._layoutFlag){
+                this.trigger("layout_start");
                 this._performLayout();
                 this._renderFlag = true;
                 this._layoutFlag = false;
+                this.trigger("layout_end");
             }
             if (this._renderFlag){
                 this.trigger("render_start");
