@@ -30,6 +30,8 @@ define(function (require , exports , module) {
             this.chart = null;
             this._options = null;
             this._data = null;
+            this._bounds = null;
+            this._bbox = null;
         } ,
         getCanvas: function () {
             return this.chart.renderer.g("verychart-components");
