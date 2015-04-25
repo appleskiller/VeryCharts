@@ -1,8 +1,7 @@
 define(function (require , exports , module) {
     "use strict";
-    var helper = require("verycharts/helper");
+    
     var Chart = require("verycharts/Chart");
-    var ChartFactory = require("verycharts/ChartFactory");
     
     var instances = {};
     var count = 0;

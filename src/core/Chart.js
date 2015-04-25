@@ -6,42 +6,51 @@ define(function (require , exports , module) {
     var helper = require("verycharts/helper");
     var ChartDefault = require("verycharts/ChartDefault");
     var ChartFactory = require("verycharts/ChartFactory");
+    require("verycharts/ChartRenderer");
+    require("verycharts/ChartPlot");
+    require("verycharts/Component");
+    
+    require("verycharts/Component/Title");
     
     var Chart = evts.EventTrigger.extend({
         constructor: function Chart(dom) {
-            this._dom = this._initDOM(dom);
+            this.dom = this._initDOM(dom);
             this._defaultOptions = ChartDefault.cloneDefault();
             this._chartPlots = {};
             this._components = {};
+            this.bounds({x: 0 , y: 0 , width: 0 , height: 0});
         } ,
+        renderer: null ,
+        dom: null ,
+        originOptions: null ,
+        originData: null ,
+        
+        _bounds: null ,
         _components: null ,
         _chartPlots: null ,
         _defaultOptions: null ,
         _mergedOptions: null ,
         _options: null ,
-        _dom: null ,
         _data: null ,
         _theme: null ,
         
-        _originOptions: null ,
-        _originData: null ,
-        setData: function (data) {
+        data: function (data) {
+            if (arguments.length === 0){ return this._data; }
             this._data = data;
             this._dataChanged = true;
             this.invalidateRender();
             return this;
         } ,
-        setOptions: function (options , merge) {
+        options: function (options , merge) {
+            if (arguments.length === 0){ return this._options; }
             this._options = options;
             this._mergeOptionFlag = (merge === true);
             this._optionChanged = true;
             this.invalidateRender();
             return this;
         } ,
-        getOptions: function () {
-            return this._options;
-        } ,
-        setTheme: function (theme) {
+        theme: function (theme) {
+            if (arguments.length === 0){ return this._theme; }
             this._theme = theme;
             this._themeChanged = true;
             this.invalidateRender();
@@ -49,6 +58,11 @@ define(function (require , exports , module) {
         } ,
         resize: function () {
             this.invalidateLayout();
+            return this;
+        } ,
+        bounds: function (value) {
+            if (arguments.length === 0){ return this._bounds; }
+            this._bounds = value;
             return this;
         } ,
         invalidateRender: function () {
@@ -64,11 +78,25 @@ define(function (require , exports , module) {
             }
         } ,
         destroy: function () {
-            this._selector = null;
-            this._styles = null;
+            this._options = null;
             this._data = null;
             this._theme = null;
-            this._originData = null;
+            this._defaultOptions = null;
+            this._mergedOptions = null;
+            this.bounds(null);
+            
+            this.dom = null;
+            this.originData = null;
+            this.originOptions = null;
+            if (this.renderer){ this.renderer.destroy(); }
+            this.renderer = null;
+            
+            var prop;
+            for (prop in this._components) { this._components[prop].destroy(); }
+            this._components = null;
+            for (prop in this._chartPlots) { this._chartPlots[prop].destroy(); }
+            this._chartPlots = null;
+            
             this._destroyed = true;
             return this;
         } ,
@@ -105,24 +133,33 @@ define(function (require , exports , module) {
             }else{
                 this._mergedOptions = this._options;
             }
-            this._originOptions = helper.merge(helper.clone(this._defaultOptions) , this._mergedOptions);
-            
-            var type;
-            for (type in this._chartPlots) {
-                this._chartPlots[type].setOptions(this._originOptions);
+            this.originOptions = helper.merge(helper.clone(this._defaultOptions) , this._mergedOptions);
+            // 检查renderer类型。
+            var rendererType = this.originOptions.chart.renderer;
+            if (this.renderer){
+                var oldType = this.renderer.getType();
+                if (oldType !== rendererType){
+                    this.renderer.destroy();
+                    this.renderer = ChartFactory.getRendererInstance(rendererType , this.dom);
+                }
+            }else{
+                this.renderer = ChartFactory.getRendererInstance(rendererType , this.dom);
             }
-            // 循环option创建或更新component
+            // 更新options
             var component , prop;
-            for (prop in this._originOptions) {
+            for (prop in this.originOptions) {
                 if (this._components[prop]){
-                    this._components[type].setOptions(this._originOptions);
+                    this._components[prop].options(this.originOptions);
                 }else{
                     component = ChartFactory.getComponentInstance(prop , this);
                     if (component){
-                        this._components[type] = component;
-                        component.setOptions(this._originOptions);
+                        this._components[prop] = component;
+                        component.options(this.originOptions);
                     }
                 }
+            }
+            for (prop in this._chartPlots) {
+                this._chartPlots[prop].options(this.originOptions);
             }
         } ,
         _performData: function () {
@@ -169,7 +206,7 @@ define(function (require , exports , module) {
             // 更新或删除plot
             for (type in this._chartPlots) {
                 if (plotTypes[type] === true){
-                    this._chartPlots[type].setData(this._originData);
+                    this._chartPlots[type].data(this._originData);
                     delete plotTypes[type];
                 }else{
                     this._chartPlots[type].destroy();
@@ -181,17 +218,17 @@ define(function (require , exports , module) {
                 plot = ChartFactory.getChartPlotInstance(type);
                 if (plot){
                     this._chartPlots[type] = plot;
-                    plot.setOptions(this._originOptions).setData(this._originData);
+                    plot.options(this.originOptions).data(this._originData);
                 }
             }
             // 更新components
             for (type in this._components) {
-                this._components[type].setData(this._originData);
+                this._components[type].data(this._originData);
             }
         } ,
         _performLayout: function () {
-            var size = htmlUtil.size(this.chart._dom);
-            var bounds = {x: 0 , y: 0 , width: size.width , height: size.height};
+            var size = htmlUtil.size(this.dom);
+            var bounds = this.bounds({x: 0 , y: 0 , width: size.width , height: size.height}).bounds();
             var type;
             for (type in this._components) {
                 bounds = this._components[type].layout(bounds);
@@ -201,7 +238,13 @@ define(function (require , exports , module) {
             }
         } ,
         _render: function () {
+            var rendererType = this.originOptions.chart.renderer;
+            var bounds = this.bounds();
+            this.renderer.attr("width" , bounds.width).attr("height" , bounds.height);
             // 渲染基础组件及chart
+            var type;
+            for (type in this._chartPlots) { this._chartPlots[type].render(); }
+            for (type in this._components) { this._components[type].render(); }
         } ,
         _nextFrame: function () {
             if (!this._nextFrameFlag){

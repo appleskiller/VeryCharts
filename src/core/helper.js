@@ -67,6 +67,7 @@ define(function (require , exports , module) {
                 o1[prop] = clone(o2[prop] , true);
             }
         }
+        return o1;
     }
     
     function merge() {
@@ -80,6 +81,7 @@ define(function (require , exports , module) {
             if (typeof arguments[i] === "object")
                 mergeObject(obj , arguments[i] , arrayCallback);
         }
+        return obj;
     }
     
     function getValue(obj , prop) {
@@ -319,10 +321,10 @@ define(function (require , exports , module) {
     
     function parseStats(opt) {
         if (!opt)
-            return {normal: opt , hover: null};
-        var ret = {normal: {} , hover: null} , prop;
+            return {normal: opt , hover: null , selected: null};
+        var ret = {normal: {} , hover: null , selected: null} , prop;
         for (prop in opt) {
-            if (!hasOwnProperty(ret , prop)){
+            if (!ret.hasOwnProperty(prop)){
                 ret.normal[prop] = opt[prop];
             }
         }

@@ -1,6 +1,6 @@
 define(function (require , exports , module) {
     "use strict";
-    require("d3");
+    var d3 = require("d3");
     
     function DistributionChart() {
         var tickData = d3.scale.linear().ticks(10);

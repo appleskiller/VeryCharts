@@ -1,11 +1,7 @@
 define(function (require , exports , module) {
     "use strict";
     
-    var oop = require("oop");
     var ChartDefault = require("verycharts/ChartDefault");
-    var ChartPlot = require("verycharts/ChartPlot");
-    var Component = require("verycharts/Component");
-    var Renderer = require("verycharts/ChartRenderer");
     
     var chartPlotLib = {};
     var componentLib = {};
@@ -24,24 +20,24 @@ define(function (require , exports , module) {
             }
             return null;
         } ,
-        getRendererInstance: function (type , target) {
+        getRendererInstance: function (type , dom) {
             if (rendererLib[type]){
-                return new rendererLib[type](target);
+                return new rendererLib[type](dom);
             }
             return null;
         } ,
         register: function (desc) {
             if (!desc) return;
-            var type = desc.type , ctor = desc.ctor , 
+            var type = desc.type , factory = desc.factory , ctor = desc.ctor , 
                 defaultOptions = desc.defaultOptions;
-            if (!type || !ctor) return;
-            if (oop.is(ctor , ChartPlot)){
+            if (!type || !factory || !ctor) return;
+            if (factory === "plot"){
                 chartPlotLib[type] = ctor;
                 ChartDefault.mergeDefault(defaultOptions);
-            } else if (oop.is(ctor , Component)){
+            } else if (factory === "component"){
                 componentLib[type] = ctor;
                 ChartDefault.mergeDefault(defaultOptions);
-            } else if (oop.is(ctor , Renderer)){
+            } else if (factory === "renderer"){
                 rendererLib[type] = ctor;
             }
         } 

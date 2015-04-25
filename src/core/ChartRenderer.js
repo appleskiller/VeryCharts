@@ -1,78 +1,42 @@
 define(function (require , exports , module) {
     "use strict";
-    var evts = require("evts");
+    var oop = require("oop");
+    var d3 = require("d3");
+    var htmlUtil = require("verycharts/htmlUtil");
     var ChartFactory = require("verycharts/ChartFactory");
-    // 缺省SVG renderer
-    var Element = evts.EventTrigger.extend({
-        constructor: function Element(canvas , parent) {
-            this.canvas = canvas;
+    // 缺省d3 SVG renderer
+    var Renderer = oop.Class.extend({
+        constructor: function Renderer(dom) {
+            this.selection = d3.select(dom).append("svg");
         } ,
-        canvas: null ,
-        parent: null ,
-        css: function (value) {
-            // body...
-            return this;
+        getType: function () {
+            return "svg";
         } ,
-        attr: function (value) {
-            // body...
-            return this;
+        select: function () {
+            return this.selection.select.apply(this.selection , arguments);
         } ,
-        getBBox: function () {
-            // body...
+        selectAll: function () {
+            return this.selection.selectAll.apply(this.selection , arguments);
         } ,
-        toFront: function () {
-            // body...
+        attr: function () {
+            return this.selection.attr.apply(this.selection , arguments);
         } ,
-        add: function () {
-            // body...
-            return this;
+        g: function (className) {
+            var g = this.selection.select(className)
+            if (g.empty()){
+                g = this.selection.append("g").attr("class" , className);
+            }
+            return g;
         } ,
         destroy: function () {
-            // body...
+            this.selection.remove();
+            this.selection = null;
         }
-    })
-    var Path = Element.extend({
-        constructor: function Path(renderer) {
-            // body...
-        } ,
-        datas: function (value) {
-            // body...
-        }
-    })
-    var Label = Element.extend({
-        constructor: function Label(renderer) {
-            // body...
-        } ,
-        text: function (value) {
-            // body...
-        } ,
-    })
-    var Renderer = evts.EventTrigger.extend({
-        constructor: function Renderer(ctx) {
-            // body...
-        } ,
-        label: function (text , left , top) {
-            // body...
-        } ,
-        path: function (datas) {
-            // body...
-        } ,
-        g: function () {
-            // body...
-        } ,
-        circle: function (centerX , centerY , radius) {
-            
-        } ,
-        image: function (source, x, y, width, height){
-            
-        } ,
-        rect: function (x , y , width , height , cornerRadius) {
-            // body...
-        } 
     });
     
     ChartFactory.register({
         type: "svg" ,
+        factory: "renderer" ,
         ctor: Renderer
     });
     module.exports = Renderer;

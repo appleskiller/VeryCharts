@@ -48,7 +48,7 @@ define(function (require , exports , module) {
         if (props) extend(child.prototype, props);
     
         child.__super__ = parent.prototype;
-    
+        child.extend = classExtend;
         return child;
     }
     

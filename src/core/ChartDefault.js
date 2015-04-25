@@ -5,6 +5,7 @@ define(function (require , exports , module) {
     
     function chart() {
         return {
+            "renderer": "svg" ,
             "style": {}
         }
     }

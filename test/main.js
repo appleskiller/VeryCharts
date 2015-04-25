@@ -8,22 +8,27 @@ requirejs.config({
         "display": "core/display" ,
         
         "verycharts": "verycharts" ,
-        "verycharts/Chart": "core/Chart" ,
         "verycharts/consts": "core/consts" ,
         "verycharts/helper": "core/helper" ,
+        "verycharts/htmlUtil": "util/htmlUtil" ,
         
+        "verycharts/Chart": "core/Chart" ,
         "verycharts/ChartDefault": "core/ChartDefault" ,
         "verycharts/ChartRenderer": "core/ChartRenderer" ,
         "verycharts/ChartFactory": "core/ChartFactory" ,
         "verycharts/ChartPlot": "core/ChartPlot" ,
         "verycharts/Component": "core/Component" ,
-        "verycharts/Element": "core/Element" ,
         
-        "verycharts/htmlUtil": "util/htmlUtil"
+        "verycharts/Component/Title": "component/Title" ,
+    } ,
+    shim: {
+        "d3":{
+            exports: "d3"
+        }
     }
 });
 
-requirejs(["chart/distribution"] , function (DistributionChart) {
-    var chart = new DistributionChart();
-    
+requirejs(["verycharts"] , function (verycharts) {
+    var chart = verycharts.create(document.getElementById("chart"));
+    chart.options({});
 })

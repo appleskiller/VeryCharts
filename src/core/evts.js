@@ -99,6 +99,9 @@ define(function (require , exports , module) {
         trigger: eventApi.trigger
     });
     
+    oop.extendable(Event);
+    oop.extendable(EventTrigger);
+    
     module.exports = {
         Event: Event ,
         EventTrigger: EventTrigger ,
