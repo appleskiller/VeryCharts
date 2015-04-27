@@ -8,6 +8,11 @@ define(function (require , exports , module) {
             SIZE: "size" ,
             LEGEND: "legend" ,
             ATTRIBUTE: "attribute"
+        } ,
+        prop2css: {
+            "fontSize": "font-size" ,
+            "fontWeight": "font-weight" ,
+            "fontFamily": "font-family"
         }
-    }
-})
+    };
+});

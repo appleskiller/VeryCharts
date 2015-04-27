@@ -6,12 +6,10 @@ define(function (require , exports , module) {
     var ChartFactory = require("verycharts/ChartFactory");
     // 缺省d3 SVG renderer
     var Renderer = oop.Class.extend({
-        constructor: function Renderer(dom) {
-            this.selection = d3.select(dom).append("svg");
+        constructor: function Renderer(d) {
+            this.selection = htmlUtil.isSVG(d) ? d3.select(d) : d3.select(d).append("svg");
         } ,
-        getType: function () {
-            return "svg";
-        } ,
+        type: "svg" ,
         select: function () {
             return this.selection.select.apply(this.selection , arguments);
         } ,
@@ -22,11 +20,14 @@ define(function (require , exports , module) {
             return this.selection.attr.apply(this.selection , arguments);
         } ,
         g: function (className) {
-            var g = this.selection.select(className)
+            var g = this.selection.select("."+className)
             if (g.empty()){
                 g = this.selection.append("g").attr("class" , className);
             }
             return g;
+        } ,
+        label: function () {
+            return this.selection.append("text")
         } ,
         destroy: function () {
             this.selection.remove();

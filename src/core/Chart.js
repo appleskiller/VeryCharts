@@ -2,6 +2,7 @@ define(function (require , exports , module) {
     "use strict";
     var oop = require("oop");
     var evts = require("evts");
+    var consts = require("verycharts/consts");
     var htmlUtil = require("verycharts/htmlUtil");
     var helper = require("verycharts/helper");
     var ChartDefault = require("verycharts/ChartDefault");
@@ -134,27 +135,33 @@ define(function (require , exports , module) {
                 this._mergedOptions = this._options;
             }
             this.originOptions = helper.merge(helper.clone(this._defaultOptions) , this._mergedOptions);
+            var component , prop , renderer;
             // 检查renderer类型。
             var rendererType = this.originOptions.chart.renderer;
             if (this.renderer){
-                var oldType = this.renderer.getType();
+                var oldType = this.renderer.type;
                 if (oldType !== rendererType){
                     this.renderer.destroy();
+                    for (prop in this._components) { this._components[prop].destroy(); }
+                    this._components = {};
+                    for (prop in this._chartPlots) { this._chartPlots[prop].destroy(); }
+                    this._chartPlots = {};
+                    this.dom.innerHTML = ""
                     this.renderer = ChartFactory.getRendererInstance(rendererType , this.dom);
                 }
             }else{
                 this.renderer = ChartFactory.getRendererInstance(rendererType , this.dom);
             }
             // 更新options
-            var component , prop;
             for (prop in this.originOptions) {
                 if (this._components[prop]){
                     this._components[prop].options(this.originOptions);
                 }else{
-                    component = ChartFactory.getComponentInstance(prop , this);
+                    renderer = ChartFactory.getRendererInstance(this.renderer.type , this.renderer.g("verychart-components").node());
+                    component = ChartFactory.getComponentInstance(prop , this , renderer);
                     if (component){
                         this._components[prop] = component;
-                        component.options(this.originOptions);
+                        this._enterComponents.push(component);
                     }
                 }
             }
@@ -166,7 +173,7 @@ define(function (require , exports , module) {
             var header , data , plotTypes , plot , type , i;
             // 准备数据
             if (!this._data){
-                this._originData = null;
+                this.originData = null;
             }else{
                 if (oop.is(this._data , Array)){
                     header = this._data[0];
@@ -176,7 +183,7 @@ define(function (require , exports , module) {
                         header = [header];
                         data = [data];
                     }
-                    this._originData = {
+                    this.originData = {
                         header: header ,
                         data: data
                     }
@@ -184,19 +191,19 @@ define(function (require , exports , module) {
                     header = this._data.header;
                     data = this._data.data;
                     if (!header || !data || !oop.is(header , Array) || oop.is(data , Array)){
-                        this._originData = null;
+                        this.originData = null;
                     }else{
-                        this._originData = data;
+                        this.originData = data;
                     }
                 } else {
-                    this._originData = null;
+                    this.originData = null;
                 }
             }
             // 解析header
             plotTypes = {};
-            if (this._originData){
-                header = this._originData.header;
-                data = this._originData.data;
+            if (this.originData){
+                header = this.originData.header;
+                data = this.originData.data;
                 for (i = 0; i < header.length; i++) {
                     if (header[i].plotType){
                         plotTypes[header[i].plotType] = true;
@@ -206,7 +213,7 @@ define(function (require , exports , module) {
             // 更新或删除plot
             for (type in this._chartPlots) {
                 if (plotTypes[type] === true){
-                    this._chartPlots[type].data(this._originData);
+                    this._chartPlots[type].data(this.originData);
                     delete plotTypes[type];
                 }else{
                     this._chartPlots[type].destroy();
@@ -214,16 +221,18 @@ define(function (require , exports , module) {
                 }
             }
             // 创建plot
+            var renderer;
             for (type in plotTypes) {
-                plot = ChartFactory.getChartPlotInstance(type);
+                renderer = ChartFactory.getRendererInstance(this.renderer.type , this.renderer.g("verychart-chartplot").node());
+                plot = ChartFactory.getChartPlotInstance(type , this , renderer);
                 if (plot){
                     this._chartPlots[type] = plot;
-                    plot.options(this.originOptions).data(this._originData);
+                    this._enterComponents.push(plot);
                 }
             }
             // 更新components
             for (type in this._components) {
-                this._components[type].data(this._originData);
+                this._components[type].data(this.originData);
             }
         } ,
         _performLayout: function () {
@@ -238,7 +247,6 @@ define(function (require , exports , module) {
             }
         } ,
         _render: function () {
-            var rendererType = this.originOptions.chart.renderer;
             var bounds = this.bounds();
             this.renderer.attr("width" , bounds.width).attr("height" , bounds.height);
             // 渲染基础组件及chart
@@ -259,7 +267,15 @@ define(function (require , exports , module) {
         _enterFrame: function () {
             if (this._destroyed)
                 return;
+            this._enterComponents = [];
+            // 提交属性改变。
             this._commitChanged();
+            // 为新增加的组件及plot设置options和data
+            for (var i = 0; i < this._enterComponents.length; i++) {
+                this._enterComponents[i].options(this.originOptions).data(this.originData);
+                this._layoutFlag = true;
+            }
+            this._enterComponents = null;
             if (this._layoutFlag){
                 this.trigger("layout_start");
                 this._performLayout();

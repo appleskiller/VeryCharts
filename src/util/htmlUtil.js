@@ -1,4 +1,18 @@
 define(function (require , exports , module) {
+    var consts = require("verycharts/consts");
+    
+    var prop2css = consts.prop2css;
+    
+    function cssProp(prop) {
+        return prop2css[prop] || prop;
+    }
+    
+    function cssValue(prop , value) {
+        var valueType = typeof value;
+        if (prop === "font-size" && valueType === "number")
+            return value + "px";
+        return value;
+    }
     
     function cssWidth (dom) {  
         if (dom.style.width) return dom.style.width;  
@@ -30,6 +44,9 @@ define(function (require , exports , module) {
     var span = null;
     
     var util = {
+        isSVG: function (dom) {
+            return dom && dom.nodeType === 1 && (dom instanceof window.SVGElement);
+        } ,
         globalX: function (dom) {
             return dom.offsetParent ? dom.offsetLeft + util.globalX(dom.offsetParent) : dom.offsetLeft;
         } ,
@@ -79,8 +96,10 @@ define(function (require , exports , module) {
             if (typeof css === "string"){
                 span.setAttribute("style" , css);
             }else{
-                for (var prop in css) {
-                    span.style[prop] = css[prop];
+                var cssp , prop;
+                for (prop in css) {
+                    cssp = cssProp(prop);
+                    span.style[cssp] = cssValue(cssp , css[prop]);
                 }
             }
             span.style.visibility = "hidden";

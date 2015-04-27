@@ -8,15 +8,15 @@ define(function (require , exports , module) {
     var rendererLib = {};
     
     module.exports = {
-        getChartPlotInstance: function (chartType) {
+        getChartPlotInstance: function (chartType , chart , renderer) {
             if (chartPlotLib[chartType]){
-                return new chartPlotLib[chartType]();
+                return new chartPlotLib[chartType](chart , renderer);
             }
             return null;
         } ,
-        getComponentInstance: function (componentName , chart) {
+        getComponentInstance: function (componentName , chart , renderer) {
             if (componentLib[componentName]){
-                return new componentLib[componentName](chart);
+                return new componentLib[componentName](chart , renderer);
             }
             return null;
         } ,

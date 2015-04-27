@@ -19,7 +19,7 @@ requirejs.config({
         "verycharts/ChartPlot": "core/ChartPlot" ,
         "verycharts/Component": "core/Component" ,
         
-        "verycharts/Component/Title": "component/Title" ,
+        "verycharts/Component/Title": "component/Title" 
     } ,
     shim: {
         "d3":{

@@ -344,6 +344,48 @@ define(function (require , exports , module) {
         }
         return opt;
     }
+    function archorLayout(size , bounds , layout) {
+        var restBounds = {x: bounds.x , y: bounds.y , width: bounds.width , height: bounds.height} , layoutBounds , bbox ,
+            xx , yy , ww , hh , bbxx , bbyy , bbww , bbhh;
+        if (layout.anchor === "bottom"){
+            ww = bounds.width ; hh = size.height + layout.margin*2; xx = bounds.x ; yy = bounds.y + bounds.height - hh ;
+            bbww = size.width; bbhh = size.height;
+            if (layout.floating !== true){ restBounds.height -= hh; }
+        }else if (layout.anchor === "left"){
+            ww = size.height + layout.margin*2 ; hh = bounds.height; xx = bounds.x ; yy = bounds.y ;
+            bbww = size.height; bbhh = size.width;
+            if (layout.floating !== true){ restBounds.x -= ww ; restBounds.width -= ww; }
+        }else if (layout.anchor === "right"){
+            ww = size.height + layout.margin*2 ; hh = bounds.height; xx = bounds.x + bounds.width - ww ; yy = bounds.y ;
+            bbww = size.height; bbhh = size.width;
+            if (layout.floating !== true){ restBounds.width -= ww; }
+        }else{
+            ww = bounds.width ; hh = size.height + layout.margin*2; xx = bounds.x ; yy = bounds.y ; 
+            bbww = size.width; bbhh = size.height;
+            if (layout.floating !== true){ restBounds.y -= hh; restBounds.height -= hh; }
+        }
+        layoutBounds = {x: xx , y: yy , width: ww , height: hh};
+        if (layout.horizontal === "right"){
+            bbxx = xx + ww - layout.margin - bbww;
+        }else if (layout.horizontal === "center"){
+            bbxx = xx + Math.floor((ww - bbww)/2);
+        }else{
+            bbxx = xx + layout.margin;
+        }
+        if (layout.vertical === "bottom"){
+            bbyy = yy + hh - layout.margin - bbhh;
+        }else if (layout.vertical === "center"){
+            bbyy = yy + Math.floor((hh - bbhh)/2);
+        }else{
+            bbyy = yy + layout.margin;
+        }
+        bbox = {x: bbxx , y: bbyy , width: bbww , height: bbhh};
+        return {
+            bounds: layoutBounds ,
+            bbox: bbox ,
+            rest: restBounds
+        };
+    }
     
     module.exports = {
         nextFrame: nextFrame ,
@@ -352,6 +394,7 @@ define(function (require , exports , module) {
         merge: merge ,
         getValue: getValue ,
         parseOption: parseOption ,
+        archorLayout: archorLayout ,
         
         DataCube: DataCube ,
         DataCubeIndicator: DataCubeIndicator
