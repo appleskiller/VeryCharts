@@ -8,6 +8,9 @@ define(function (require , exports , module) {
     // 工具函数
     //
     //===========================================================
+    /**
+     * 实现为requestAnimationFrame，如果浏览器不支持则使用setTimeout实现。
+     **/
     var nextFrame = window.requestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
@@ -19,7 +22,9 @@ define(function (require , exports , module) {
     else{
         nextFrame = function(callback) { setTimeout(callback, 17); };
     }
-    
+    /**
+     * 延迟执行。
+     **/
     function callLater(callback) {
         setTimeout(callback , 0);
     }
@@ -83,7 +88,9 @@ define(function (require , exports , module) {
         }
         return obj;
     }
-    
+    /**
+     * 返回对象属性。prop可以是以“.”分割的属性链。
+     **/
     function getValue(obj , prop) {
         if (!prop)
             return obj;
@@ -318,7 +325,22 @@ define(function (require , exports , module) {
     DataCubeIndicator.create = function (headers , datas) {
         return new DataCubeIndicator(new DataCube(headers, datas));
     };
-    
+    /**
+     * 解析具有状态的样式。例如
+     * {
+     *      "a": true
+     *      "normal" {
+     *          "b": 1
+     *      }
+     * }
+     * 将被解析成为
+     * {
+     *      normal: {
+     *          "a": true ,
+     *          "b": 1
+     *      }
+     * }
+     **/
     function parseStats(opt) {
         if (!opt)
             return {normal: opt , hover: null , selected: null};
@@ -338,12 +360,18 @@ define(function (require , exports , module) {
         }
         return ret;
     }
+    /**
+     * 解析指定type的option。
+     **/
     function parseOption(type , opt) {
         if (type === "stats"){
             return parseStats(opt);
         }
         return opt;
     }
+    /**
+     * 执行布局。
+     **/
     function archorLayout(size , bounds , layout) {
         var restBounds = {x: bounds.x , y: bounds.y , width: bounds.width , height: bounds.height} , layoutBounds , bbox ,
             xx , yy , ww , hh , bbxx , bbyy , bbww , bbhh;

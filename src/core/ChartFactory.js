@@ -7,20 +7,23 @@ define(function (require , exports , module) {
     var componentLib = {};
     var rendererLib = {};
     
+    /**
+     * chart工厂对象。
+     **/
     module.exports = {
-        getChartPlotInstance: function (chartType , chart , renderer) {
+        createChartPlot: function (chartType , chart , renderer) {
             if (chartPlotLib[chartType]){
                 return new chartPlotLib[chartType](chart , renderer);
             }
             return null;
         } ,
-        getComponentInstance: function (componentName , chart , renderer) {
+        createComponent: function (componentName , chart , renderer) {
             if (componentLib[componentName]){
                 return new componentLib[componentName](chart , renderer);
             }
             return null;
         } ,
-        getRendererInstance: function (type , dom) {
+        createRenderer: function (type , dom) {
             if (rendererLib[type]){
                 return new rendererLib[type](dom);
             }

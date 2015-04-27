@@ -12,7 +12,9 @@ define(function (require , exports , module) {
     require("verycharts/Component");
     
     require("verycharts/Component/Title");
-    
+    /**
+     * chart。
+     **/
     var Chart = evts.EventTrigger.extend({
         constructor: function Chart(dom) {
             this.dom = this._initDOM(dom);
@@ -34,7 +36,12 @@ define(function (require , exports , module) {
         _options: null ,
         _data: null ,
         _theme: null ,
-        
+        /**
+         * 设置数据。
+         * 标准结构为[[headerOpt , headerOpt , ...] , [value , value , ...] , [value , value , ...]]
+         * 或者{header: [headerOpt , headerOpt , ...] , data: [[value , value , ...] , [value , value , ...]]}
+         * 也可以是一维数组[headerOpt , value , value , ...] - 它代表了一列数据。
+         **/
         data: function (data) {
             if (arguments.length === 0){ return this._data; }
             this._data = data;
@@ -42,6 +49,9 @@ define(function (require , exports , module) {
             this.invalidateRender();
             return this;
         } ,
+        /**
+         * 设置配置。可选是否与上次的option进行merge，默认为不merge
+         **/
         options: function (options , merge) {
             if (arguments.length === 0){ return this._options; }
             this._options = options;
@@ -50,6 +60,9 @@ define(function (require , exports , module) {
             this.invalidateRender();
             return this;
         } ,
+        /**
+         * 设置主题。
+         **/
         theme: function (theme) {
             if (arguments.length === 0){ return this._theme; }
             this._theme = theme;
@@ -57,6 +70,9 @@ define(function (require , exports , module) {
             this.invalidateRender();
             return this;
         } ,
+        /**
+         * 重新计算大小。
+         **/
         resize: function () {
             this.invalidateLayout();
             return this;
@@ -66,12 +82,18 @@ define(function (require , exports , module) {
             this._bounds = value;
             return this;
         } ,
+        /**
+         * 失效renderer，稍后进行渲染。
+         **/
         invalidateRender: function () {
             if (!this._renderFlag){
                 this._renderFlag = true;
                 this._nextFrame();
             }
         } ,
+        /**
+         * 失效布局，稍后执行布局。
+         **/
         invalidateLayout: function () {
             if (!this._layoutFlag){
                 this._layoutFlag = true;
@@ -101,6 +123,9 @@ define(function (require , exports , module) {
             this._destroyed = true;
             return this;
         } ,
+        /**
+         * 提交属性改变。
+         **/
         _commitChanged: function () {
             if (this._themeChanged){
                 this._mergeTheme();
@@ -118,6 +143,9 @@ define(function (require , exports , module) {
                 this._dataChanged = false;
             }
         } ,
+        /**
+         * 初始化dom。
+         **/
         _initDOM: function (dom) {
             dom.style["-webkit-tap-highlight-color"] = "transparent" ;
             dom.style["-webkit-user-select"] = "none" ;
@@ -125,9 +153,15 @@ define(function (require , exports , module) {
             dom.style["cursor"] = "default" ;
             return dom;
         } ,
+        /**
+         * 合并主题。
+         **/
         _mergeTheme: function () {
             helper.merge(this._defaultOptions , this._theme);
         } ,
+        /**
+         * 合并options。同时更新组件及图形的options。
+         **/
         _mergeOption: function () {
             if (this._mergeOptionFlag && this._mergedOptions){
                 this._mergedOptions = helper.merge(this._mergedOptions , this._options);
@@ -147,18 +181,18 @@ define(function (require , exports , module) {
                     for (prop in this._chartPlots) { this._chartPlots[prop].destroy(); }
                     this._chartPlots = {};
                     this.dom.innerHTML = ""
-                    this.renderer = ChartFactory.getRendererInstance(rendererType , this.dom);
+                    this.renderer = ChartFactory.createRenderer(rendererType , this.dom);
                 }
             }else{
-                this.renderer = ChartFactory.getRendererInstance(rendererType , this.dom);
+                this.renderer = ChartFactory.createRenderer(rendererType , this.dom);
             }
             // 更新options
             for (prop in this.originOptions) {
                 if (this._components[prop]){
                     this._components[prop].options(this.originOptions);
                 }else{
-                    renderer = ChartFactory.getRendererInstance(this.renderer.type , this.renderer.g("verychart-components").node());
-                    component = ChartFactory.getComponentInstance(prop , this , renderer);
+                    renderer = ChartFactory.createRenderer(this.renderer.type , this.renderer.g("verychart-components").node());
+                    component = ChartFactory.createComponent(prop , this , renderer);
                     if (component){
                         this._components[prop] = component;
                         this._enterComponents.push(component);
@@ -169,6 +203,9 @@ define(function (require , exports , module) {
                 this._chartPlots[prop].options(this.originOptions);
             }
         } ,
+        /**
+         * 准备数据。同时更新组件及图形的data。
+         **/
         _performData: function () {
             var header , data , plotTypes , plot , type , i;
             // 准备数据
@@ -223,8 +260,8 @@ define(function (require , exports , module) {
             // 创建plot
             var renderer;
             for (type in plotTypes) {
-                renderer = ChartFactory.getRendererInstance(this.renderer.type , this.renderer.g("verychart-chartplot").node());
-                plot = ChartFactory.getChartPlotInstance(type , this , renderer);
+                renderer = ChartFactory.createRenderer(this.renderer.type , this.renderer.g("verychart-chartplot").node());
+                plot = ChartFactory.createChartPlot(type , this , renderer);
                 if (plot){
                     this._chartPlots[type] = plot;
                     this._enterComponents.push(plot);
@@ -235,6 +272,9 @@ define(function (require , exports , module) {
                 this._components[type].data(this.originData);
             }
         } ,
+        /**
+         * 执行布局。先进行组件布局，然后进行图形布局。各个元素按顺序切割布局框。
+         **/
         _performLayout: function () {
             var size = htmlUtil.size(this.dom);
             var bounds = this.bounds({x: 0 , y: 0 , width: size.width , height: size.height}).bounds();
@@ -246,6 +286,9 @@ define(function (require , exports , module) {
                 bounds = this._chartPlots[type].layout(bounds);
             }
         } ,
+        /**
+         * 执行render函数绘制显示。
+         **/
         _render: function () {
             var bounds = this.bounds();
             this.renderer.attr("width" , bounds.width).attr("height" , bounds.height);
@@ -254,6 +297,9 @@ define(function (require , exports , module) {
             for (type in this._chartPlots) { this._chartPlots[type].render(); }
             for (type in this._components) { this._components[type].render(); }
         } ,
+        /**
+         * 请求下一帧回调。
+         **/
         _nextFrame: function () {
             if (!this._nextFrameFlag){
                 this._nextFrameFlag = true;
@@ -264,6 +310,9 @@ define(function (require , exports , module) {
                 });
             }
         } ,
+        /**
+         * nextFrame回调。
+         **/
         _enterFrame: function () {
             if (this._destroyed)
                 return;

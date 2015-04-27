@@ -8,18 +8,24 @@ define(function (require , exports , module) {
     var isArray = Array.isArray || function(obj) {
         return toString.call(obj) == '[object Array]';
     };
-    
+    /**
+     * 指定对象是否具有某属性。
+     **/
     function has(obj , prop) {
         return hasOwnProperty.call(obj , prop);
     }
-    
+    /**
+     * 指定实例是否是某类实例。
+     **/
     function is(instance , ctor) {
         if (ctor === Array)
             return isArray(instance);
         else
             return instance instanceof ctor;
     }
-    
+    /**
+     * 浅克隆属性到指定obj上。
+     **/
     function extend(obj) {
         var args = slice.call(arguments , 1);
         for (var i = 0; i < args.length; i++) {
@@ -51,7 +57,9 @@ define(function (require , exports , module) {
         child.extend = classExtend;
         return child;
     }
-    
+    /**
+     * 类。
+     **/
     function Class() {
         // body...
     }

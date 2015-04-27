@@ -2,6 +2,9 @@ define(function (require , exports , module) {
     "use strict";
     var Component = require("verycharts/Component");
     require("d3");
+    /**
+     * 轴组件。
+     **/
     var Axis = Component.extend({
         constructor: function Axis(owner , renderer , axisType) {
             this.axisType = axisType;
@@ -11,11 +14,21 @@ define(function (require , exports , module) {
         _ranges: null ,
         _axis: null ,
         layout: function (bounds) {
-            
+            var options = this.options();
+            if (!this.enabled()){
+                return bounds;
+            }else{
+                
+            }
             return bounds;
         } ,
         redraw: function () {
             // body...
+            return this;
+        } ,
+        clean: function () {
+            // body...
+            return this;
         } ,
         destroy: function () {
             this._ranges = null ,
@@ -25,6 +38,7 @@ define(function (require , exports , module) {
     });
     
     var defaultOptions = {
+        "enabled": true ,
         "allowDecimals": false , // 是否允许小数位
         "alternateGridColor": [], // 隔列颜色
         "categories": [] , // 分类项目
@@ -32,6 +46,8 @@ define(function (require , exports , module) {
         "maxPadding": 0.12 ,
         "min": null ,
         "minPadding": 0.12 ,
+        "offset": 0, // 轴标题位置
+        "opposite": false , // 轴位置翻转
         
         "dateTimeLabelFormats": {
             'millisecond': '%H:%M:%S.%L',
@@ -67,10 +83,6 @@ define(function (require , exports , module) {
             "minorTickPosition": "inside" ,
             "minorTickWidth": 1 ,
         } ,
-        
-        "offset": {}, // 轴标题位置
-        "opposite": false , // 轴位置翻转
-        
         "labels": {
             "enabled": true ,
             "align": "center" ,

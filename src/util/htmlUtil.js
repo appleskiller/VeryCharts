@@ -44,21 +44,39 @@ define(function (require , exports , module) {
     var span = null;
     
     var util = {
+        /**
+         * 是否为SVG节点。
+         **/
         isSVG: function (dom) {
             return dom && dom.nodeType === 1 && (dom instanceof window.SVGElement);
         } ,
+        /**
+         * dom全局X坐标。
+         **/
         globalX: function (dom) {
             return dom.offsetParent ? dom.offsetLeft + util.globalX(dom.offsetParent) : dom.offsetLeft;
         } ,
+        /**
+         * dom全局Y坐标。
+         **/
         globalY: function (dom) {
             return dom.offsetParent ? dom.offsetTop + util.globalY(dom.offsetParent) : dom.offsetTop;
         } ,
+        /**
+         * dom相对父文档X坐标。
+         **/
         parentX: function (dom) {
             return dom.parentNode == dom.offsetParent ? dom.offsetLeft : util.globalX(dom) - util.globalX(dom.parentNode);
         } ,
+        /**
+         * dom相对父文档Y坐标。
+         **/
         parentY: function (dom) {
             return dom.parentNode == dom.offsetParent ? dom.offsetTop : util.globalY(dom) - util.globalY(dom.parentNode);
         } ,
+        /**
+         * 测量指定dom的大小。
+         **/
         size: function (dom) {
             if (dom.style.display != "none"){  
                 return {width: dom.offsetWidth , height: dom.offsetHeight} || {width: parseInt(cssWidth(dom)) , height: parseInt(cssHeight(dom))};  
@@ -72,16 +90,24 @@ define(function (require , exports , module) {
             restoreCSS( dom, old );
             return size;
         } ,
+        /**
+         * 窗口的大小。
+         **/
         windowSize: function () {
             var de = document.documentElement;
             var ww = window.innerWidth || ( de && de.clientWidth ) || document.body.clientWidth;
             var hh = window.innerHeight || ( de && de.clientHeight ) || document.body.clientHeight;
             return {width: ww , height: hh};
         } ,
+        /**
+         * 页面的大小。
+         **/
         pageSize: function () {
             return {width: document.body.scrollWidth , height: document.body.scrollHeight};
         } ,
-        
+        /**
+         * 指定文字的大小。
+         **/
         stringSize: function (str , css) {
             if (!str){
                 return { width: 0 , height: 0};

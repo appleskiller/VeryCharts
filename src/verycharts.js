@@ -9,6 +9,10 @@ define(function (require , exports , module) {
     
     var verycharts = {
         version: "0.1.0" ,
+        /**
+         * 在指定的dom上创建一个chart实例。
+         * 在同一个dom上重复创建，之前的chart实例会被销毁。
+         **/
         create: function (dom) {
             if (!dom)
                 return null;

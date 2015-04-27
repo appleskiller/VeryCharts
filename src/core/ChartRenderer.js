@@ -4,7 +4,10 @@ define(function (require , exports , module) {
     var d3 = require("d3");
     var htmlUtil = require("verycharts/htmlUtil");
     var ChartFactory = require("verycharts/ChartFactory");
-    // 缺省d3 SVG renderer
+    /**
+     * 组件渲染器。缺省d3 SVG renderer。
+     * 如果需要扩展使用其他类型的renderer比如canvas renderer，可以参考d3接口并继承此类实现。同时使用ChartFactory.register()方法注册到工厂。
+     **/
     var Renderer = oop.Class.extend({
         constructor: function Renderer(d) {
             this.selection = htmlUtil.isSVG(d) ? d3.select(d) : d3.select(d).append("svg");

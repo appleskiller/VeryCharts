@@ -25,7 +25,8 @@ requirejs.config({
         "d3":{
             exports: "d3"
         }
-    }
+    } ,
+    waitSeconds: 10
 });
 
 requirejs(["verycharts"] , function (verycharts) {
