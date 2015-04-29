@@ -191,7 +191,7 @@ define(function (require , exports , module) {
                 if (this._components[prop]){
                     this._components[prop].options(this.originOptions);
                 }else{
-                    renderer = ChartFactory.createRenderer(this.renderer.type , this.renderer.g("verychart-components").node());
+                    renderer = ChartFactory.createRenderer(this.renderer.type , this._getComponentGroup());
                     component = ChartFactory.createComponent(prop , this , renderer);
                     if (component){
                         this._components[prop] = component;
@@ -260,7 +260,7 @@ define(function (require , exports , module) {
             // 创建plot
             var renderer;
             for (type in plotTypes) {
-                renderer = ChartFactory.createRenderer(this.renderer.type , this.renderer.g("verychart-chartplot").node());
+                renderer = ChartFactory.createRenderer(this.renderer.type , this._getChartPlotGroup());
                 plot = ChartFactory.createChartPlot(type , this , renderer);
                 if (plot){
                     this._chartPlots[type] = plot;
@@ -338,6 +338,20 @@ define(function (require , exports , module) {
                 this._renderFlag = false;
                 this.trigger("render_end");
             }
+        } , 
+        _getComponentGroup: function () {
+            var g = this.renderer.select(".verychart-components")
+            if (g.empty()){
+                g = this.renderer.g().attr("class" , "verychart-components");
+            }
+            return g.node();
+        } ,
+        _getChartPlotGroup: function () {
+            var g = this.renderer.select(".verychart-chartplot")
+            if (g.empty()){
+                g = this.renderer.g().attr("class" , "verychart-chartplot");
+            }
+            return g.node();
         }
     });
     

@@ -1,12 +1,12 @@
 define(function (require , exports , module) {
     "use strict";
-    var Component = require("verycharts/Component");
+    var ChartComponent = require("verycharts/Component").ChartComponent;
     /**
      * chart图形基类。
      **/
-    var ChartPlot = Component.extend({
+    var ChartPlot = ChartComponent.extend({
         constructor: function ChartPlot(chart , renderer) {
-            Component.apply(this. arguments);
+            ChartComponent.apply(this , arguments);
         }
     });
     

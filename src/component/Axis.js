@@ -1,47 +1,74 @@
 define(function (require , exports , module) {
     "use strict";
-    var Component = require("verycharts/Component");
-    require("d3");
+    var Component = require("verycharts/Component").Component;
+    var d3 = require("d3");
     /**
      * 轴组件。
      **/
     var Axis = Component.extend({
-        constructor: function Axis(owner , renderer , axisType) {
+        constructor: function Axis(owner , renderer , type , axisType) {
+            this.type = type;
             this.axisType = axisType;
+            this._scale = this._createScale(axisType);
+            this._axis = this._createAxis(renderer.type);
             Component.apply(this , arguments);
         } ,
-        axisType: null , // "x"|"y"
-        _ranges: null ,
+        axisType: null , // "ordinal" | "linear"
+        type: null , // "x" | "y"
+        _scale: null ,
         _axis: null ,
-        layout: function (bounds) {
-            var options = this.options();
-            if (!this.enabled()){
-                return bounds;
-            }else{
-                
-            }
-            return bounds;
-        } ,
+        // layout: function (bounds) {
+        //     var options = this.options();
+        //     if (!this.enabled()){
+        //         return bounds;
+        //     }else{
+        //         var domain = this.data();
+        //         var range = 
+        //         this._scale.domain(this.data())
+        //     }
+        //     return bounds;
+        // } ,
         redraw: function () {
             // body...
             return this;
         } ,
         clean: function () {
-            // body...
+            this.renderer.select(".axis").remove();
             return this;
         } ,
         destroy: function () {
-            this._ranges = null ,
+            this._scale = null ,
             this._axis = null ,
             Component.prototype.destroy.apply(this , arguments);
+        } ,
+        _createScale: function (axisType) {
+            if (axisType === "ordinal"){
+                return d3.scale.ordinal();
+            } else if (axisType === "linear"){
+                return d3.scale.linear();
+            } else if (axisType === "log") {
+                return d3.scale.log();
+            }
+            return d3.scale.linear();
+        } ,
+        _createAxis: function (rendererType) {
+            // TODO 根据不同呈现器类型创建不同的轴。
+            return d3.svg.axis();
         }
     });
     
+    var XAxis = Axis.extend({
+        constructor: function XAxis(owner , renderer , axisType) {
+            // body...
+        } ,
+        
+    })
+    
     var defaultOptions = {
         "enabled": true ,
+        "axisType": "linear" , // 轴类型
         "allowDecimals": false , // 是否允许小数位
         "alternateGridColor": [], // 隔列颜色
-        "categories": [] , // 分类项目
         "max": null ,
         "maxPadding": 0.12 ,
         "min": null ,

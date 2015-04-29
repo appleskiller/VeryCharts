@@ -1,28 +1,28 @@
 define(function (require , exports , module) {
     "use strict";
     var helper = require("verycharts/helper");
-    var Component = require("verycharts/Component");
+    var ChartComponent = require("verycharts/Component").ChartComponent;
     var ChartFactory = require("verycharts/ChartFactory");
     var htmlUtil = require("verycharts/htmlUtil");
     /**
      * 标题组件。
      **/
-    var Title = Component.extend({
+    var Title = ChartComponent.extend({
         constructor: function Title(owner , renderer) {
-            Component.apply(this , arguments);
+            ChartComponent.apply(this , arguments);
         } ,
         options: function (options) {
             if (arguments.length === 0) { return this._options; }
             options = options.title;
             options.style = helper.parseOption("stats" , options.style);
-            return Component.prototype.options.call(this , options);
+            return ChartComponent.prototype.options.call(this , options);
         } , 
         layout: function (bounds) {
             var options = this.options();
             if (!this.enabled()){
                 return bounds;
             }else{
-                var titleSize = htmlUtil.stringSize(options.text , options.style.normal);
+                var titleSize = this._getTitleSize(options);
                 var ret = helper.archorLayout(titleSize , bounds , options.layout);
                 this.bounds(ret.bounds).bbox(ret.bbox);
                 return ret.rest;
@@ -64,6 +64,9 @@ define(function (require , exports , module) {
                     .text(options.text);
             return this;
         } ,
+        _getTitleSize: function (options) {
+            return htmlUtil.stringSize(options.text , options.style.normal)
+        }
     });
     
     ChartFactory.register({

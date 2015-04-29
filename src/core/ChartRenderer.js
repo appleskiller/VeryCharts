@@ -22,12 +22,8 @@ define(function (require , exports , module) {
         attr: function () {
             return this.selection.attr.apply(this.selection , arguments);
         } ,
-        g: function (className) {
-            var g = this.selection.select("."+className)
-            if (g.empty()){
-                g = this.selection.append("g").attr("class" , className);
-            }
-            return g;
+        g: function () {
+            return this.selection.append("g");
         } ,
         label: function () {
             return this.selection.append("text")

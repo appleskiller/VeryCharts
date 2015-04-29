@@ -38,14 +38,6 @@ define(function (require , exports , module) {
             return this;
         } ,
         /**
-         * 布局。
-         * 传入指定bounds，在规定的bounds内执行布局。布局后通常返回切割后剩下的部分。
-         **/
-        layout: function (bounds) {
-            this._isDirty = true;
-            return bounds;
-        } ,
-        /**
          * 设置是否可用。
          **/
         enabled: function (value) {
@@ -125,5 +117,21 @@ define(function (require , exports , module) {
         }
     });
     
-    module.exports = Component;
+    var ChartComponent = Component.extend({
+        constructor: function ChartComponent(owner , renderer) {
+            Component.apply(this , arguments);
+        } ,
+        /**
+         * 布局。
+         * 传入指定bounds，在规定的bounds内执行布局。布局后通常返回切割后剩下的部分。
+         **/
+        layout: function (bounds) {
+            return bounds;
+        } ,
+    })
+    
+    module.exports = {
+        Component: Component ,
+        ChartComponent: ChartComponent
+    };
 })
