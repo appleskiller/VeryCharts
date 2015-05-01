@@ -24,7 +24,7 @@ define(function (require , exports , module) {
         options: function (options) {
             if (arguments.length === 0){ return this._options; }
             this._options = options;
-            this.enabled(!(options.enabled === false));
+            this.enabled(!(options && options.enabled === false));
             this._isDirty = true;
             return this;
         } ,

@@ -1,4 +1,5 @@
 {
-    groupType: "column | row | value | color | size" ,
-    plotType: "bar | ..."
+    groupType: "column | row | mark | color | size | alpha" ,
+    plotType: "bar | line | ..." ,
+    fieldType: "dimension | measure"
 }

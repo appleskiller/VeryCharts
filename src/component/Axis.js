@@ -6,30 +6,38 @@ define(function (require , exports , module) {
      * 轴组件。
      **/
     var Axis = Component.extend({
-        constructor: function Axis(owner , renderer , type , axisType) {
-            this.type = type;
-            this.axisType = axisType;
-            this._scale = this._createScale(axisType);
-            this._axis = this._createAxis(renderer.type);
+        constructor: function Axis(owner , renderer) {
             Component.apply(this , arguments);
         } ,
-        axisType: null , // "ordinal" | "linear"
-        type: null , // "x" | "y"
+        // axisType: null , // "ordinal" | "linear"
+        // type: null , // "x" | "y"
         _scale: null ,
         _axis: null ,
-        // layout: function (bounds) {
-        //     var options = this.options();
-        //     if (!this.enabled()){
-        //         return bounds;
-        //     }else{
-        //         var domain = this.data();
-        //         var range = 
-        //         this._scale.domain(this.data())
-        //     }
-        //     return bounds;
-        // } ,
+        scale: function () {
+            if (arguments.length === 0) {return this._scale}
+            this._scale = arguments[0];
+            var axis = this.axis();
+            if (axis)
+                axis.scale(this._scale);
+            this._isDirty = true;
+            return this;
+        } , 
+        axis: function () {
+            if (arguments.length === 0) {return this._axis}
+            this._axis = arguments[0];
+            var scale = this.scale();
+            if (scale){
+                this._axis.scale(scale);
+            }
+            this._isDirty = true;
+            return this;
+        } ,
         redraw: function () {
-            // body...
+            var axisDisplay = this.renderer.select(".axis");
+            if (axisDisplay.empty()){
+                axisDisplay = this.renderer.g().attr("class" , "axis");
+            }
+            axisDisplay.call(this.axis());
             return this;
         } ,
         clean: function () {
@@ -57,7 +65,7 @@ define(function (require , exports , module) {
         }
     });
     
-    var XAxis = Axis.extend({
+    var OrdinalAxis = Axis.extend({
         constructor: function XAxis(owner , renderer , axisType) {
             // body...
         } ,

@@ -9,13 +9,7 @@ define(function (require , exports , module) {
             ChartComponent.apply(this , arguments);
         }
     });
-    
-    var AxisPlot = ChartPlot.extend({
-        
-    });
-    
     module.exports = {
         ChartPlot: ChartPlot ,
-        AxisPlot: AxisPlot
     };
 });

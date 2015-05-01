@@ -2,7 +2,14 @@
 define(function (require , exports , module) {
     "use strict";
     var d3 = require("d3");
+    var ChartComponent = require("verycharts/Component").ChartComponent;
     
+    
+    var FrequencyChart = ChartComponent.extend({
+        constructor: function FrequencyChart(chart , renderer) {
+            ChartComponent.apply(this , arguments);
+        }
+    })
     
     
     function FrequencyChart() {
