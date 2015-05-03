@@ -1,6 +1,6 @@
 define(function (require , exports , module) {
     "use strict";
-    
+    var oop = require("oop");
     var consts = require("verycharts/consts");
     
     //-----------------------------------------------------------
@@ -102,229 +102,6 @@ define(function (require , exports , module) {
         }
         return value;
     }
-    //-----------------------------------------------------------
-    //
-    // 工具类
-    //
-    //===========================================================
-    var Topic = function (value , groups , valueIndeies , parent) {
-        this.value = value;
-        this.groups = groups;
-        this.parent = parent;
-        this.cube = (parent instanceof CrossDataCube) ? parent : parent.cube;
-    }
-    Topic.prototype = {
-        rowIndeies: null ,
-        cross: function (topic) {
-            // TODO
-        } ,
-        getMembers: function () {
-            if (!this.members)
-                this.members = [];
-            return this.members;
-        } ,
-        getDatas: function () {
-            // TODO
-        }
-    }
-    
-    var CrossDataCube = function (cube , rows , columnIndeies , valueIndeies) {
-        this.sourceCube = cube;
-        this.rows = rows || [];
-        this.columnIndeies = columnIndeies || [];
-        this.valueIndeies = valueIndeies || [];
-        this.groups = rows.concat(columnIndeies);
-    };
-    CrossDataCube.prototype = {
-        getValue: function (columnIndex , rowIndex) {
-            return this._sourceCube.getValue(this.groups[columnIndex] , rowIndex);
-        } ,
-        getMembers: function () {
-            if (!this.members){
-                this._build();
-            }
-            return this.members;
-        } ,
-        _build: function () {
-            this.members = [];
-            
-            if (!this.groups.length)
-                return;
-            
-            var indicator = this.sourceCube.createIndicator();
-            var i , l = this.groups.length , headerLength = this.sourceCube.headers.length ,
-                last = this.valueIndeies.length === 0 ? headerLength - 1 : headerLength ,
-                rowData , cind , value , topic , topicParent , map ;
-            var groups = this.groups;
-            var topicMap = {};
-            while(!indicator.afterLast()){
-                rowData = indicator.rowData;
-                topic = topicParent = this;
-                map = topicMap;
-                for (i = 0; i < l; i++){
-                    cind = groups[i];
-                    if (cind === last)
-                        break;
-                    value = rowData[cind];
-                    if (!map[value]){
-                        map[value] = {map: {} , topic: null};
-                        map[value].topic = new Topic(value , groups.slice(1) , this.valueIndeies , topicParent);
-                    }
-                    topic = map[value].topic;
-                    topicParent.getMembers().push(topic);
-                    topicParent = topic;
-                    map = map[value].map;
-                }
-                if (!topic.rowIndeies)
-                    topic.rowIndeies = [];
-                topic.rowIndeies.push(rowData.rowIndex);
-                indicator.moveNext();
-            }
-        }
-    };
-    
-    var DataCube = function (headers , datas) {
-        this.headers = headers;
-        this.datas = datas;
-    };
-    DataCube.prototype = {
-        createCrossDataCube: function (rows , columns , values) {
-            return new CrossDataCube(this , rows , columns , values);
-        } ,
-        /**
-         * 为此cube创建访问指针。
-         */
-        createIndicator: function () { return new DataCubeIndicator(this); },
-        /**
-         * 返回结果集行数
-         */
-        getRowLength: function () { return this._datas.length; },
-        /**
-         * 按索引返回指定行列数据。
-         * @param columnName
-         * @param rowIndex
-         * @return
-         */
-        getValue: function (columnIndex, rowIndex) {
-            return this._datas[rowIndex][columnIndex];
-        },
-        hasGroupType: function (groupType) {
-            for (var i = 0; i < this._headers.length; i++) {
-                if (this._headers[i].groupType === groupType)
-                    return true;
-            }
-            return false;
-        },
-        getGroupTypeIndex: function () {
-            if (this._groupTypeIndex)
-                return this._groupTypeIndex;
-            this.buildMaps();
-            return this._groupTypeIndex;
-        },
-        /**
-         * 返回组类型相对表头所包含的索引数组
-         * @return
-         */
-        getIndexsByGroupType: function (groupType) {
-            return this.getGroupTypeIndex()[groupType] ? this.getGroupTypeIndex()[groupType] : [];
-        },
-        /**
-         * 按表头索引位置返回列描述
-         * @return
-         */
-        getColumnByIndex: function (columnIndex) {
-            return this.getMetas()[DataCube.COLUMN_INDEX][columnIndex];
-        },
-        /**
-         * 返回针对列的各项描述值。
-         * @return
-         */
-        getMetas: function () {
-            if (this._meta)
-                return this._meta;
-            this.buildMaps();
-            return this._meta;
-        },
-        buildMaps: function () {
-            this._meta = [[], [], [], [], [], [], [], [], [], [], []];
-            this._groupTypeIndex = {};
-            this._columnNams = [];
-            var index = 0, groupType, groupSet, columnSet, vec;
-            for (var i = 0; i < this._desc.length; i++) {
-                groupSet = this._desc[i];
-                groupType = groupSet.name;
-                vec = [];
-                this._groupTypeIndex[groupType] = [];
-                for (var j = 0; j < groupSet.items.length; j++) {
-                    columnSet = groupSet.items[j];
-                    vec.push(index);
-                    this._groupTypeIndex[groupType].push(index);
-                    this._meta[DataCube.COLUMN_NAME_INDEX].push(columnSet.field.title);
-                    // this._meta[DataCube.COLUMN_TYPE_INDEX].push(columnSet.get("fieldType"));
-                    // this._meta[DataCube.COLUMN_DESCRIPTION_INDEX].push(columnSet.description);
-                    this._meta[DataCube.GROUP_NAME_INDEX].push(groupSet.label);
-                    this._meta[DataCube.GROUP_TYPE_INDEX].push(groupSet.name);
-                    // this._meta[DataCube.GROUP_DESCRIPTION_INDEX].push(groupSet.description);
-                    this._meta[DataCube.COLUMN_INDEX].push(columnSet);
-                    this._meta[DataCube.GROUP_INDEX].push(groupSet);
-                    this._meta[DataCube.COLUMN_DATA_TYPE].push(columnSet.field.dataType);
-                    this._meta[DataCube.COLUMN_DATA_FORMAT].push(columnSet.field.format);
-                    // this._meta[DataCube.COLUMN_ID].push(columnSet.get("name"));
-                    this._columnNams.push(columnSet.field.title);
-                    index++;
-                }
-            }
-        }
-    };
-    
-    DataCube.COLUMN_INDEX = 0
-    DataCube.COLUMN_NAME_INDEX = 1;
-    DataCube.COLUMN_TYPE_INDEX = 2;
-    
-    var DataCubeIndicator = function (cube) {
-        this.cube = cube;
-        this.rowIndex = 0;
-        this.rowData = cube.getData()[0];
-    };
-    DataCubeIndicator.prototype = {
-        getColumnName: function (columnIndex) {
-            return this.cube.getMetas()[DataCube.COLUMN_NAME_INDEX][columnIndex];
-        },
-        getColumnType: function (columnIndex) {
-            return this.cube.getMetas()[DataCube.COLUMN_TYPE_INDEX][columnIndex];
-        },
-        getColumn: function (columnIndex) {
-            return this.cube.getMetas()[DataCube.COLUMN_INDEX][columnIndex];
-        },
-        getColumnNames: function () {
-            return this.cube.getColumnNames();
-        },
-        beforeFirst: function () {
-            return this.rowIndex < 0;
-        },
-        afterLast: function () {
-            return this.rowIndex >= this.cube.getRowLength();
-        },
-        moveNext: function () {
-            if (!this.afterLast()) {
-                this.rowIndex++;
-                this.rowData = this.cube.datas[this.rowIndex];
-                return true;
-            }
-            return false;
-        },
-        movePrevious: function () {
-            if (!this.beforeFirst()) {
-                this.rowIndex--;
-                this.rowData = this.cube.datas[this.rowIndex];
-                return true;
-            }
-            return false;
-        }
-    };
-    DataCubeIndicator.create = function (headers , datas) {
-        return new DataCubeIndicator(new DataCube(headers, datas));
-    };
     /**
      * 解析具有状态的样式。例如
      * {
@@ -414,7 +191,333 @@ define(function (require , exports , module) {
             rest: restBounds
         };
     }
+    //-----------------------------------------------------------
+    //
+    // 工具类
+    //
+    //===========================================================
+    var Topic = oop.Class.extend({
+        constructor: function Topic (caption , value , depth , parent , isVirtualTopic) {
+            this.caption = caption;
+            this.value = value;
+            this.depth = depth;
+            this.parent = parent;
+            this.members = [];
+            var cube = this.cube = (parent instanceof CrossDataCube) ? parent : parent.cube;
+            this.header = cube.headers[cube.groups[this.depth]]
+            this.isMeasure = (cube.measureMap[cube.groups[depth]] === true);
+            this.isVirtualTopic = (isVirtualTopic === true);
+        } ,
+        rowIndeies: null ,
+        cross: function (topic) {
+            // TODO
+        } ,
+        getDatas: function () {
+            // TODO
+        }
+    });
     
+    var CrossHeader = oop.Class.extend({
+        constructor: function CrossHeader(cube) {
+            this.cube = cube;
+            this.levels = [];
+        } ,
+        addTopic: function (depth , topic) {
+            if (!this.levels[depth]){
+                this.levels[depth] = []
+            }
+            this.levels[depth].push(topic);
+        }
+    });
+    
+    var CrossBody = oop.Class.extend({
+        constructor: function CrossBody(cube) {
+            this.cube = cube;
+            this.columns = [];
+            this.rows = [];
+        } ,
+        getData: function (columnIndex , rowIndex) {
+            // TODO
+            return null;
+        }
+    })
+    
+    var CrossDataCube = oop.Class.extend({
+        constructor: function CrossDataCube (headers , datas , rows , columns , measures) {
+            this.headers = headers || [];
+            this.datas = datas || [];
+            this.cube = new DataCube(headers , datas);
+            this.rows = rows || [];
+            this.columns = columns || [];
+            measures = measures || [];
+            this.others = [];
+            this.members = [];
+            this.noMeasure = !measures || measures.length === 0;
+            this.crossPoint = this.rows.length;
+            this.measureMap = {};
+            var measureMap = this.measureMap , others = this.others , i , inds = {};
+            for (i = 0; i < measures.length; i++) {
+                measureMap[measures[i]] = true;
+            }
+            this.groups = [];
+            for (i = 0; i < rows.length; i++) {
+                this.groups.push(rows[i]);
+                inds[rows[i]] = true;
+            }
+            for (i = 0; i < columns.length; i++) {
+                this.groups.push(columns[i]);
+                inds[columns[i]] = true;
+            }
+            // 将其他列组织到一起。
+            for (i = 0; i < this.headers.length; i++) {
+                if (inds[i] !== true){
+                    others.push(i);
+                }
+            }
+        } ,
+        getValue: function (columnIndex , rowIndex) {
+            return this._sourceCube.getValue(this.groups[columnIndex] , rowIndex);
+        } ,
+        build: function () {
+            this.columnHeader = this._createColumnHeader();
+            this.rowHeader = this._createRowHeader();
+            this.body = this._createBody();
+            
+            if (!this.groups.length)
+                return;
+            
+            var indicator = this.cube.createIndicator();
+            var l = this.groups.length , 
+                i , rowData , cind , key , value , topic , topicParent , map , isMeasure , isVirtualTopic;
+            var groups = this.groups;
+            var topicMap = {};
+            while(!indicator.afterLast()){
+                rowData = indicator.rowData;
+                topic = topicParent = this;
+                map = topicMap;
+                for (i = 0; i < l; i++){
+                    cind = groups[i];
+                    isMeasure = (this.measureMap[cind] === true)
+                    // 如果为度量或没有度量且为最后一个维度，则以索引作为key
+                    if (isMeasure || (this.noMeasure && i === l - 1 && this.others.length === 0)){
+                        key = cind;
+                        isVirtualTopic = true;
+                    }else{
+                        key = rowData[cind];
+                        isVirtualTopic = false;
+                    }
+                    value = rowData[cind];
+                    if (!map[key]){
+                        map[key] = {map: {} , topic: null};
+                        topic = map[key].topic = this._createTopic(key , value , i , topicParent , isVirtualTopic);
+                        this._setupTopic(topic);
+                        topicParent.members.push(topic);
+                    } else {
+                        topic = map[key].topic;
+                    }
+                    topicParent = topic;
+                    map = map[key].map;
+                }
+                if (!topic.rowIndeies)
+                    topic.rowIndeies = [];
+                topic.rowIndeies.push(indicator.rowIndex);
+                indicator.moveNext();
+            }
+            return this;
+        } ,
+        _createTopic: function (key , value , depth , parent , isVirtualTopic) {
+            return new Topic(key , value , depth , parent , isVirtualTopic);
+        } ,
+        _createColumnHeader: function () {
+            return new CrossHeader();
+        } ,
+        _createRowHeader: function () {
+            return new CrossHeader();
+        } ,
+        _createBody: function () {
+            return new CrossBody();
+        } ,
+        _setupTopic: function (topic) {
+            var depth = topic.depth;
+            if (depth < this.crossPoint){
+                this.rowHeader.addTopic(depth , topic);
+                if (depth == this.crossPoint - 1){
+                    this.body.rows.push(topic);
+                }
+            } else {
+                this.columnHeader.addTopic(depth - this.crossPoint , topic);
+                if (depth == this.crossPoint){
+                    this.body.columns.push(topic);
+                }
+            }
+        }
+    })
+    
+    var DataCube = oop.Class.extend({
+        constructor: function (headers , datas) {
+            this.headers = headers || [];
+            this.datas = datas || [];
+            this.metas = {};
+            this.indeiesMap = {};
+        } ,
+        createCrossDataCube: function (rows , columns , measures , CubeCtor) {
+            CubeCtor = CubeCtor || CrossDataCube;
+            var cube = new CubeCtor(this.headers , this.datas , rows , columns , measures);
+            cube.cube = this;
+            return cube;
+        } ,
+        /**
+         * 为此cube创建访问指针。
+         */
+        createIndicator: function () { return new DataCubeIndicator(this); },
+        /**
+         * 返回结果集行数
+         */
+        getRowLength: function () { return this.datas.length; },
+        /**
+         * 按索引返回指定行列数据。
+         * @param columnName
+         * @param rowIndex
+         * @return
+         */
+        getValue: function (columnIndex, rowIndex) {
+            return this.datas[rowIndex][columnIndex];
+        } ,
+        getIndeiesBy: function (prop , value) {
+            if (prop == null)
+                return [];
+            if (!this.indeiesMap[prop] || !this.indeiesMap[prop][value]){
+                this._buildIndeiesMap(prop , value);
+            }
+            return this.indeiesMap[prop][value] || [];
+        } ,
+        getMetasBy: function (prop) {
+            if (!prop)
+                return [];
+            if (!this.metas[prop]){
+                this._buildMetas(prop);
+            }
+            return this.metas[prop];
+        } ,
+        isEmpty: function () {
+            return this.headers.length === 0;
+        } ,
+        _buildIndeiesMap: function (prop) {
+            if (!this.metas[prop]){
+                this._buildMetas(prop);
+            }
+            var metas = this.metas[prop];
+            var map = this.indeiesMap[prop] = {};
+            var value;
+            for (var i = 0; i < metas.length; i++) {
+                value = metas[i];
+                if (!map[value]){
+                    map[value] = [];
+                }
+                map[value].push(i);
+            }
+        } ,
+        _buildMetas: function (prop) {
+            this.metas[prop] = [];
+            for (var i = 0; i < this.headers.length; i++) {
+                this.metas[prop].push(getValue(this.headers[i] , prop));
+            }
+        }
+    });
+    
+    var DataCubeIndicator = function (cube) {
+        this.cube = cube;
+        this.rowIndex = 0;
+        this.rowData = cube.datas[0];
+    };
+    DataCubeIndicator.prototype = {
+        get: function (columnIndex , prop) {
+            return this.cube.getMetasBy(prop)[columnIndex];
+        } ,
+        getHeader: function (columnIndex) {
+            return this.cube.headers[columnIndex];
+        } ,
+        beforeFirst: function () {
+            return this.rowIndex < 0;
+        },
+        afterLast: function () {
+            return this.rowIndex >= this.cube.getRowLength();
+        },
+        moveNext: function () {
+            if (!this.afterLast()) {
+                this.rowIndex++;
+                this.rowData = this.cube.datas[this.rowIndex];
+                return true;
+            }
+            return false;
+        },
+        movePrevious: function () {
+            if (!this.beforeFirst()) {
+                this.rowIndex--;
+                this.rowData = this.cube.datas[this.rowIndex];
+                return true;
+            }
+            return false;
+        }
+    };
+    DataCubeIndicator.create = function (headers , datas) {
+        return new DataCubeIndicator(new DataCube(headers, datas));
+    };
+    
+    var Dictionary = function () {
+		this._keys = [];
+		this._values = [];
+	};
+	Dictionary.prototype = {
+		length: 0 , 
+		_keys: null , 
+		_values: null , 
+		put: function (key , value) {
+			if (this._keys.indexOf(key) == -1){
+				this._keys.push(key);
+				this._values.push(value);
+				this.length++;
+				return value;
+			};
+			return null;
+		} , 
+		del: function (key) {
+			var ind = this._keys.indexOf(key);
+			var value;
+			if (ind != -1){
+				this._keys.splice(ind , 1);
+				value = this._values.splice(ind , 1)[0];
+				this.length--;
+				return value;
+			};
+			return null;
+		} , 
+		get: function (key) {
+			var ind = this._keys.indexOf(key);
+			if (ind != -1)
+				return this._values[ind];
+			return null;
+		} , 
+		has: function (key) {
+			return this._keys.indexOf(key) != -1;
+		} ,
+		each: function (fn , thisObject) {
+			if (!fn || typeof fn !== "function")
+				return;
+			for (var i = 0; i < this.length; i++){
+				if (thisObject)
+					fn.apply(thisObject , this._keys[i] , this._values[i] , i);
+				else
+					fn(this._keys[i] , this._values[i] , i);
+			};
+		} , 
+		clear: function () {
+			this._keys = [];
+			this._values = [];
+			this.length = 0;
+			return this;
+		}
+	};
     module.exports = {
         nextFrame: nextFrame ,
         callLater: callLater ,
@@ -425,6 +528,11 @@ define(function (require , exports , module) {
         archorLayout: archorLayout ,
         
         DataCube: DataCube ,
-        DataCubeIndicator: DataCubeIndicator
+        DataCubeIndicator: DataCubeIndicator ,
+        CrossHeader: CrossHeader ,
+        CrossBody: CrossBody ,
+        Topic: Topic ,
+        CrossDataCube: CrossDataCube ,
+        Dictionary: Dictionary
     };
 })

@@ -19,7 +19,8 @@ requirejs.config({
         "verycharts/ChartPlot": "core/ChartPlot" ,
         "verycharts/Component": "core/Component" ,
         
-        "verycharts/Component/Title": "component/Title" 
+        "verycharts/Component/Title": "component/Title" ,
+        "verycharts/Component/DataGrid": "component/dataGrid" 
     } ,
     shim: {
         "d3":{
@@ -29,7 +30,26 @@ requirejs.config({
     waitSeconds: 10
 });
 
-requirejs(["verycharts"] , function (verycharts) {
-    var chart = verycharts.create(document.getElementById("chart"));
-    chart.options({});
+requirejs(["d3" , "verycharts" , "verycharts/ChartRenderer" , "verycharts/Component/DataGrid"] , function (d3 , verycharts , ChartRenderer , dataGrid) {
+    // var chart = verycharts.create(document.getElementById("chart"));
+    // chart.options({});
+    var dg = new dataGrid.DataGrid(this , new ChartRenderer(d3.select(document.getElementById("chart"))
+                                            .append("svg")
+                                            .attr("width" , 600)
+                                            .attr("height" , 400)
+                                            .node()))
+    dg.data({
+        header: [
+            {groupType: "column" , name: "性别"} , {groupType: "column" , name: "姓名"} , 
+            {groupType: "row" , name: "籍贯"} , {groupType: "row" , name: "年龄" , fieldType: "measure"}
+        ] ,
+        data: [
+            ["A" , "a" , "AA" , 19] ,
+            ["A" , "b" , "AA" , 20] ,
+            ["C" , "c" , "AA" , 21] ,
+            ["D" , "d" , "BB" , 22] ,
+            ["D" , "e" , "BB" , 23] ,
+            ["F" , "f" , "BB" , 24]
+        ]
+    }).render();
 })
