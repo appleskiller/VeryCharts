@@ -88,7 +88,7 @@ define(function (require , exports , module) {
                     "floating": false ,
                     "anchor": "top" ,
                     "horizontal": "center" ,
-                    "vertical": "center" ,
+                    "vertical": "middle" ,
                     "margin": 4 ,
                 }
             }

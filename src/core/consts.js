@@ -9,6 +9,12 @@ define(function (require , exports , module) {
             LEGEND: "legend" ,
             ATTRIBUTE: "attribute"
         } ,
+        viewModel: {
+            FULL: "full" ,
+            FIT_WIDTH: "fitwidth" ,
+            FIT_HEIGHT: "fitheigh" ,
+            NORMAL: "normal"
+        } ,
         prop2css: {
             "fontSize": "font-size" ,
             "fontWeight": "font-weight" ,

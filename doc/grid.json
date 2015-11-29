@@ -1,0 +1,21 @@
+{
+    viewModel: "normal | fitwidth | fitheight | full" ,
+    columnWidth: null ,
+    rowHeight: null ,
+    title: {
+        
+    } ,
+    columnHeader: {
+        title: {
+            
+        }
+    } ,
+    rowHeader: {
+        title:{
+            
+        }
+    } ,
+    body: {
+        
+    }
+}

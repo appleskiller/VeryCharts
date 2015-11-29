@@ -27,7 +27,7 @@ requirejs.config({
             exports: "d3"
         }
     } ,
-    waitSeconds: 10
+    waitSeconds: 20
 });
 
 requirejs(["d3" , "verycharts" , "verycharts/ChartRenderer" , "verycharts/Component/DataGrid"] , function (d3 , verycharts , ChartRenderer , dataGrid) {
@@ -38,18 +38,21 @@ requirejs(["d3" , "verycharts" , "verycharts/ChartRenderer" , "verycharts/Compon
                                             .attr("width" , 600)
                                             .attr("height" , 400)
                                             .node()))
-    dg.data({
-        header: [
-            {groupType: "column" , name: "性别"} , {groupType: "column" , name: "姓名"} , 
-            {groupType: "row" , name: "籍贯"} , {groupType: "row" , name: "年龄" , fieldType: "measure"}
-        ] ,
-        data: [
-            ["A" , "a" , "AA" , 19] ,
-            ["A" , "b" , "AA" , 20] ,
-            ["C" , "c" , "AA" , 21] ,
-            ["D" , "d" , "BB" , 22] ,
-            ["D" , "e" , "BB" , 23] ,
-            ["F" , "f" , "BB" , 24]
-        ]
-    }).render();
+    dg.options({viewModel: "full"})
+        .data({
+            header: [
+                {groupType: "row" , name: "性别"} , {groupType: "row" , name: "姓名"} , 
+                {groupType: "row" , name: "籍贯"} , {groupType: "row" , name: "年龄" , fieldType: "measure"}
+            ] ,
+            data: [
+                ["A" , "a" , "AA" , 19] ,
+                ["A" , "b" , "AA" , 20] ,
+                ["C" , "c" , "AA" , 21] ,
+                ["D" , "d" , "BB" , 22] ,
+                ["D" , "e" , "BB" , 23] ,
+                ["F" , "f" , "BB" , 24]
+            ]
+        })
+        .layout({x: 0 , y: 0 , width: 600 , height: 400});
+    dg.render();
 })

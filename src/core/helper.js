@@ -151,45 +151,74 @@ define(function (require , exports , module) {
      **/
     function archorLayout(size , bounds , layout) {
         var restBounds = {x: bounds.x , y: bounds.y , width: bounds.width , height: bounds.height} , layoutBounds , bbox ,
-            xx , yy , ww , hh , bbxx , bbyy , bbww , bbhh;
+            xx , yy , ww , hh , rotate = false;
         if (layout.anchor === "bottom"){
             ww = bounds.width ; hh = size.height + layout.margin*2; xx = bounds.x ; yy = bounds.y + bounds.height - hh ;
-            bbww = size.width; bbhh = size.height;
             if (layout.floating !== true){ restBounds.height -= hh; }
         }else if (layout.anchor === "left"){
             ww = size.height + layout.margin*2 ; hh = bounds.height; xx = bounds.x ; yy = bounds.y ;
-            bbww = size.height; bbhh = size.width;
+            rotate = true;
             if (layout.floating !== true){ restBounds.x -= ww ; restBounds.width -= ww; }
         }else if (layout.anchor === "right"){
             ww = size.height + layout.margin*2 ; hh = bounds.height; xx = bounds.x + bounds.width - ww ; yy = bounds.y ;
-            bbww = size.height; bbhh = size.width;
+            rotate = true;
             if (layout.floating !== true){ restBounds.width -= ww; }
         }else{
             ww = bounds.width ; hh = size.height + layout.margin*2; xx = bounds.x ; yy = bounds.y ; 
-            bbww = size.width; bbhh = size.height;
             if (layout.floating !== true){ restBounds.y -= hh; restBounds.height -= hh; }
         }
         layoutBounds = {x: xx , y: yy , width: ww , height: hh};
-        if (layout.horizontal === "right"){
-            bbxx = xx + ww - layout.margin - bbww;
-        }else if (layout.horizontal === "center"){
-            bbxx = xx + Math.floor((ww - bbww)/2);
-        }else{
-            bbxx = xx + layout.margin;
-        }
-        if (layout.vertical === "bottom"){
-            bbyy = yy + hh - layout.margin - bbhh;
-        }else if (layout.vertical === "center"){
-            bbyy = yy + Math.floor((hh - bbhh)/2);
-        }else{
-            bbyy = yy + layout.margin;
-        }
-        bbox = {x: bbxx , y: bbyy , width: bbww , height: bbhh};
+        bbox = textLayout(size , layoutBounds , {
+            margin: layout.margin ,
+            vertical: layout.vertical ,
+            horizontal: layout.horizontal ,
+            rotate: rotate
+        });
         return {
             bounds: layoutBounds ,
             bbox: bbox ,
             rest: restBounds
         };
+    }
+    function textLayout (size , bounds , layout) {
+        var bbxx , bbyy , bbww , bbhh , margin = layout.margin || 0;
+        var xx = bounds.x , yy = bounds.y , ww = bounds.width , hh = bounds.height;
+        if (layout.rotate === true){
+            bbww = size.height;
+            bbhh = size.width;
+        } else {
+            bbww = size.width;
+            bbhh = size.height;
+        }
+        if (layout.horizontal === "right"){
+            bbxx = xx + ww - margin - bbww;
+        }else if (layout.horizontal === "center"){
+            bbxx = xx + Math.floor((ww - bbww)/2);
+        }else{
+            bbxx = xx + margin;
+        }
+        if (layout.vertical === "bottom"){
+            bbyy = yy + hh - margin - bbhh;
+        }else if (layout.vertical === "middle"){
+            bbyy = yy + Math.floor((hh - bbhh)/2);
+        }else{
+            bbyy = yy + layout.margin;
+        }
+        return {x: bbxx , y: bbyy , width: bbww , height: bbhh};
+    }
+    
+    function textTransform(rotate , offset , size) {
+        var transform;
+        if (rotate === "left"){
+            transform = "translate(" + (offset.x + size.height) + " , " + (offset.y + size.width) + ")";
+            transform += " rotate(-90 , 0 , 0)";
+        } else if (rotate === "right"){
+            transform = "translate(" + offset.x + " , " + offset.y + ")";
+            transform = " rotate(90 , 0 , 0)";
+        } else {
+            transform = "translate(" + offset.x + " , " + (offset.y + size.height) + ")";
+        }
+        return transform;
     }
     //-----------------------------------------------------------
     //
@@ -206,7 +235,7 @@ define(function (require , exports , module) {
             var cube = this.cube = (parent instanceof CrossDataCube) ? parent : parent.cube;
             this.header = cube.headers[cube.groups[this.depth]]
             this.isMeasure = (cube.measureMap[cube.groups[depth]] === true);
-            this.isVirtualTopic = (isVirtualTopic === true);
+            this.isVirtual = (isVirtualTopic === true);
         } ,
         rowIndeies: null ,
         cross: function (topic) {
@@ -217,6 +246,30 @@ define(function (require , exports , module) {
         }
     });
     
+    var TopicLevel = oop.Class.extend({
+        constructor: function TopicLevel() {
+            this.topics = [];
+        } ,
+        add: function (topic) {
+            this.topics.push(topic);
+        } ,
+        at: function (index) {
+            return this.topics[index];
+        } ,
+        length: function () {
+            return this.topics.length;
+        } ,
+        each: function (callback) {
+            if (!callback){
+                return this;
+            }
+            for (var i = 0; i < this.topics.length; i++) {
+                callback(this.topics[i] , i);
+            }
+            return this;
+        }
+    })
+    
     var CrossHeader = oop.Class.extend({
         constructor: function CrossHeader(cube) {
             this.cube = cube;
@@ -224,9 +277,12 @@ define(function (require , exports , module) {
         } ,
         addTopic: function (depth , topic) {
             if (!this.levels[depth]){
-                this.levels[depth] = []
+                this.levels[depth] = new TopicLevel();
             }
-            this.levels[depth].push(topic);
+            this.levels[depth].add(topic);
+        } ,
+        lastLevel: function () {
+            return this.levels.length == 0 ? null : this.levels[this.levels.length - 1];
         }
     });
     
@@ -290,11 +346,11 @@ define(function (require , exports , module) {
             var l = this.groups.length , 
                 i , rowData , cind , key , value , topic , topicParent , map , isMeasure , isVirtualTopic;
             var groups = this.groups;
-            var topicMap = {};
+            var rowMap = {} , columnMap = {};
             while(!indicator.afterLast()){
                 rowData = indicator.rowData;
                 topic = topicParent = this;
-                map = topicMap;
+                map = rowMap;
                 for (i = 0; i < l; i++){
                     cind = groups[i];
                     isMeasure = (this.measureMap[cind] === true)
@@ -307,6 +363,9 @@ define(function (require , exports , module) {
                         isVirtualTopic = false;
                     }
                     value = rowData[cind];
+                    if (i === this.crossPoint){
+                        map = columnMap;
+                    }
                     if (!map[key]){
                         map[key] = {map: {} , topic: null};
                         topic = map[key].topic = this._createTopic(key , value , i , topicParent , isVirtualTopic);
@@ -323,6 +382,8 @@ define(function (require , exports , module) {
                 topic.rowIndeies.push(indicator.rowIndex);
                 indicator.moveNext();
             }
+            this.body.rows = this.rowHeader.lastLevel();
+            this.body.columns = this.columnHeader.lastLevel();
             return this;
         } ,
         _createTopic: function (key , value , depth , parent , isVirtualTopic) {
@@ -341,14 +402,8 @@ define(function (require , exports , module) {
             var depth = topic.depth;
             if (depth < this.crossPoint){
                 this.rowHeader.addTopic(depth , topic);
-                if (depth == this.crossPoint - 1){
-                    this.body.rows.push(topic);
-                }
             } else {
                 this.columnHeader.addTopic(depth - this.crossPoint , topic);
-                if (depth == this.crossPoint){
-                    this.body.columns.push(topic);
-                }
             }
         }
     })
@@ -526,12 +581,15 @@ define(function (require , exports , module) {
         getValue: getValue ,
         parseOption: parseOption ,
         archorLayout: archorLayout ,
+        textLayout: textLayout ,
+        textTransform: textTransform ,
         
         DataCube: DataCube ,
         DataCubeIndicator: DataCubeIndicator ,
         CrossHeader: CrossHeader ,
         CrossBody: CrossBody ,
         Topic: Topic ,
+        TopicLevel: TopicLevel ,
         CrossDataCube: CrossDataCube ,
         Dictionary: Dictionary
     };

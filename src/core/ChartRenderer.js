@@ -28,6 +28,17 @@ define(function (require , exports , module) {
         label: function () {
             return this.selection.append("text")
         } ,
+        rect: function () {
+            return this.selection.append("rect");
+        } , 
+        instance: function (d) {
+            return new Renderer(d);
+        } , 
+        clear: function () {
+            this.selection.each(function () {
+                d3.select(this).remove();
+            });
+        } ,
         destroy: function () {
             this.selection.remove();
             this.selection = null;
